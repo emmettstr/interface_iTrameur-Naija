@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta name="description" content="iTrameur NAIJA" />
+
+    <!-- scripts / css -->
+    <script src="import/iTrameur.js"></script>
+    <link rel="stylesheet" href="import/iTrameur.css" />
+    <!--<link rel="stylesheet" href="import/mystyle.css" />-->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <script src="import/jquery-3.4.1.min.js"></script>
+    <script src="import/chartist-plugin-legend.js"></script>
+    <script src="import/chartist-plugin-zoom.js"></script>
+    <link rel="stylesheet" href="import/chartist.min.css" />
+    <script src="import/chartist.min.js"></script>
+    <script src="import/chartist.min.js.map"></script>
+    <script src="import/iTrameur-chart-src.js"></script>
+
+    <script src="import/jQWCloud.js"></script>
+
+    <!-- <script src="import/dataTables.bootstrap.js"></script>  ?? -->
+    <link href="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/css/bootstrap4-toggle.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/js/bootstrap4-toggle.min.js"></script>
+    <script src="import/jquery.dataTables.js"></script>
+    <script src="import/jquery.highlight.js"></script>
+    <script src="import/dataTables.searchHighlight.min.js"></script>
+    <link rel="stylesheet" href="import/jquery.dataTables.min.css" />
+    <script src="import/dataTables.buttons.min.js"></script>
+    <script src="import/buttons.flash.min.js"></script>
+    <script src="import/jszip.min.js"></script>
+    <script src="import/pdfmake.min.js"></script>
+    <script src="import/pdfmake.min.js.map"></script>
+    <script src="import/buttons.html5.min.js"></script>
+    <script src="import/buttons.print.min.js"></script>
+    <script src="import/vfs_fonts.js"></script>
+    <link rel="stylesheet" href="import/dataTables.searchHighlight.css" />
+
+    <script src="import/FileSaver.js"></script>
+    <link rel="stylesheet" href="import/awesomplete.css" />
+    <script src="import/awesomplete.js"></script>
+    <link rel="stylesheet" href="./import/awesomplete.css" />
+    <link rel="stylesheet" href="import/uprogress.css" />
+    <script src="import/xregexp-all.js"></script>
+
+    <!--<script src="import/audiojs/audio.js"></script>-->
+    <script src="import/html5-audio-read-along-master/read-along.js"></script>
+    <script src="import/html5-audio-read-along-master/main.js"></script>
+
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+      integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+      integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+      crossorigin="anonymous"
+    ></script>
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+      integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+      crossorigin="anonymous"
+    />
+    <title>iTrameur-Naija</title>
+    <!-- <link rel="stylesheet" href="admin-dashboard.css" /> -->
+  </head>
+  <body>
+    <script>
+      var language;
+      function getLanguage() {
+        localStorage.getItem("language") == null ? setLanguage("en") : false;
+        $.ajax({
+          url: "./langues/" + localStorage.getItem("language") + ".json",
+          dataType: "json",
+          async: false,
+          dataType: "json",
+          success: function (lang) {
+            language = lang;
+          },
+        });
+        $("#delimiter").text(language.delimiter);
+        $("#concordancier").text(language.concordancier);
+        $("#specifs").text(language.specifs);
+        $("#specifsT").text(language.specifsT);
+        // $("#modeE").text(language.modeE);
+        $("#accueil").text(language.accueil);
+        $("#aide").text(language.aide);
+        $("#langues").text(language.langues);
+        $("#lieuNaissance1,#lieuNaissance2").text(language.lieuNaissance);
+        $("#lieuEnregistre1,#lieuEnregistre2").text(language.lieuEnregistre);
+        $("#sexe1,#sexe2").text(language.sexe);
+        $("#age1,#age2").text(language.age);
+        $("#genre1,#genre2").text(language.genre);
+        $("#education1,#education2").text(language.education);
+        $("#nombreLocuteur1,#nombreLocuteur2").text(language.nombreLocuteur);
+        $("#competence1,#competence2").text(language.competence);
+        $("#lanMater1,#lanMater2").text(language.lanMater);
+        $("#tip_clic").text(language.tip_clic);
+        $("#tip_clic_suivant").text(language.tip_clic_suivant);
+        $("#tip_lecteur").text(language.tip_lecteur);
+        $("#specifPartie").text(language.specifPartie);
+        $("#alert2").text(language.alert2);
+        $("#alert1").text(language.alert1);
+        $("#tableau").text(language.tableau);
+        $("#specifMot").text(language.specifMot);
+        $("#chargement").text(language.chargement);
+        $("#alert3").text(language.alert3);
+        $("#alert41").text(language.alert41);
+        $("#alert42").text(language.alert42);
+        $("#alert43").text(language.alert43);
+        $("[aria-label='Partie: activate to sort column descending']").text(language.partie);
+        $("[aria-label='Part: activate to sort column descending']").text(language.partie);
+        $("[aria-label='Contexte Gauche: activate to sort column ascending']").text(language.contexteGauche);
+        $("[aria-label='Left Context: activate to sort column ascending']").text(language.contexteGauche);
+        $("[aria-label='Contexte Droit: activate to sort column ascending']").text(language.contexteDroit);
+        $("[aria-label='Right Context: activate to sort column ascending']").text(language.contexteDroit);
+        $("#poleID").attr('placeholder',language.poleID);
+      }
+      function setLanguage(lang) {
+        localStorage.setItem("language", lang);
+        
+      }
+    </script>
+    <!-- <script>
+      $(document).ready(function () {
+        getLanguage();
+      });
+    </script> -->
+
+    <script src="import/wz_tooltip.js"></script>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+      <div class="container">
+        <a class="navbar-brand"
+          ><img  src="./images/itrameur.png" /><img
+            src="./images/logo.png"
+        /></a>
+        <div class="form-check form-check-inline">
+        <input type="checkbox" data-toggle="toggle" data-onstyle="success"  data-size="sm" height="50%" id="expertID" onclick="expertCheck();"><label class="form-check-label">&nbsp;Expert</label>
+        </div>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-toggle="collapse"
+          data-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="./admin-dashboard.html"
+                ><i class="fa fa-fw fa-home"></i><b id="accueil">Home</b></a
+              >
+            </li>
+            <!-- <li class="nav-item">
+              <a class="nav-link" href="#" name="expert" id="expertID" onclick="expertCheck();"><i class="fa fa-fw fa-briefcase"></i><b>Expert</b></a
+              >
+            </li> -->
+            <li class="nav-item">
+              <a class="nav-link" href="#"
+                ><i class="fa fa-fw fa-info-circle"></i><b id="aide">Help</b></a
+              >
+            </li>
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link dropdown-toggle"
+                href="#"
+                id="navbarDropdown"
+                role="button"
+                data-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false"
+                ><i class="fa fa-fw fa-globe"></i><b id="langues">Languages</b>
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <a class="dropdown-item" href="#" onclick="setLanguage('en');getLanguage();"
+                  >English</a
+                >
+                <a class="dropdown-item" href="#" onclick="setLanguage('fr');getLanguage();"
+                  >Français</a
+                >
+              </div>
+            </li>
+            <li class="nav-item">&nbsp;&nbsp;&nbsp;&nbsp;</li>
+            <li class="nav-item">
+            <form class="form-inline float-right">
+            <div class="awesomplete">
+              <div style="display: block;">
+                <input
+                  class="inputAwe"
+                  type="text"
+                  placeholder="entrez la forme pôle"
+                  name="pole"
+                  id="poleID"
+                  onclick="this.value=''"
+				  size=15
+                />
+              </div>
+            </div>
+            &nbsp;
+            <div class="awesomplete">
+              <div id="yesno" style="display: none;">
+                <span class="paramlabel">Pôle cible</span>&nbsp;&nbsp;<input
+                  class="inputAwe"
+                  type="text"
+                  value="entrez la forme pôle"
+                  name="poleCible"
+                  id="poleCibleID"
+                  onclick="this.value=''"
+                />
+              </div>
+            </div>
+            <input type="text" placeholder="10" id="lgcontexteID" size=2 />
+            &nbsp;
+            <button
+              type="button"
+              class="btn btn-success"
+              onclick="concordance();getLanguage()"
+              id="concordancier"
+            >
+            Concordancier
+            </button>
+            </button>
+          </form>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <br />
+    <div class="container-fluid">
+      <div class="row justify-content-between">
+      </div>
+      <div class="row justify-content-between">
+        <div class="col-3">
+          <div id="expertSpecifTotales" style="display: none;">
+            <center><h5 id="specifsT"></h5></center>
+            <button
+              type="submit"
+              class="btn btn-outline-success btn-sm btn-block"
+              title="..."
+              id="lieuNaissance1"
+              onclick="specifsTotalesParties('BIRTH_PLACE');getLanguage()"
+            ></button
+            ><button
+              type="submit"
+              class="btn btn-outline-success btn-sm btn-block"
+              title="..."
+              id="lieuEnregistre1"
+              onclick="specifsTotalesParties('LOC');getLanguage()"
+            ></button
+            ><button
+              type="submit"
+              class="btn btn-outline-success btn-sm btn-block"
+              title="..."
+              id="sexe1"
+              onclick="specifsTotalesParties('SEX');getLanguage()"
+            ></button
+            ><button
+              type="submit"
+              class="btn btn-outline-success btn-sm btn-block"
+              title="..."
+              id="age1"
+              onclick="specifsTotalesParties('AGE');getLanguage()"
+            ></button
+            ><button
+              type="submit"
+              class="btn btn-outline-success btn-sm btn-block"
+              title="..."
+              id="genre1"
+              onclick="specifsTotalesParties('TYPETEXTE');getLanguage()"
+            ></button
+            ><button
+              type="submit"
+              class="btn btn-outline-success btn-sm btn-block"
+              title="..."
+              id="nombreLocuteur1"
+              onclick="specifsTotalesParties('GENRE');getLanguage()"
+            ></button
+            ><button
+              type="submit"
+              class="btn btn-outline-success btn-sm btn-block"
+              title="..."
+              id="competence1"
+              onclick="specifsTotalesParties('COMPETENCE');getLanguage()"
+            ></button
+            ><button
+              type="submit"
+              class="btn btn-outline-success btn-sm btn-block"
+              title="..."
+              id="education1"
+              onclick="specifsTotalesParties('EDUCATION');getLanguage()"
+            ></button
+            ><button
+              type="submit"
+              class="btn btn-outline-success btn-sm btn-block"
+              title="..."
+              id="lanMater1"
+              onclick="specifsTotalesParties('MOTHER_TONGUE');getLanguage()"
+            ></button>
+          </div>
+          <br />
+          <center>
+            <h5><div id="delimiter"></div></h5>
+          </center>
+          <div id="idCheckmenuLieuBirth">
+            <p>
+              <button
+                class="btn btn-outline-success btn-sm btn-block"
+                type="button"
+                data-toggle="collapse"
+                data-target="#collapseBody0"
+                aria-expanded="false"
+                aria-controls="collapseBody"
+                id="lieuNaissance2"
+              >
+              LIEU (naissance)
+              </button>
+            </p>
+            <div class="collapse" id="collapseBody0">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="lieu-east"
+                  value="option1"
+                />
+                <label class="form-check-label" for="lieu-east">East</label>
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="lieu-north"
+                  value="option2"
+                />
+                <label class="form-check-label" for="lieu-north">North</label>
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="lieu-south-south"
+                  value="option3"
+                />
+                <label class="form-check-label" for="lieu-south-south"
+                  >South-South</label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="lieu-west"
+                  value="option4"
+                />
+                <label class="form-check-label" for="lieu-west">West</label>
+              </div>
+			  <br />
+            </div>
+          </div>
+          <div id="idCheckmenuLieu">
+            <p>
+              <button
+                class="btn btn-outline-success btn-sm btn-block"
+                type="button"
+                data-toggle="collapse"
+                data-target="#collapseBody1"
+                aria-expanded="false"
+                aria-controls="collapseBody"
+                id="lieuEnregistre2"
+              >
+              LIEU (enregistrement)
+              </button>
+            </p>
+            <div class="collapse" id="collapseBody1">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="lieu-lag"
+                  value="option1"
+                />
+                <label class="form-check-label" for="lieu-lag"
+                  >Lagos <small>(LAG)</small></label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="lieu-oni"
+                  value="option2"
+                />
+                <label class="form-check-label" for="lieu-oni"
+                  >Onitsha <small>(ONI)</small></label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="lieu-iba"
+                  value="option3"
+                />
+                <label class="form-check-label" for="lieu-iba"
+                  >Ibadan <small>(IBA)</small></label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="lieu-ben"
+                  value="option4"
+                />
+                <label class="form-check-label" for="lieu-ben"
+                  >Benin <small>(BEN)</small></label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="lieu-abj"
+                  value="option5"
+                />
+                <label class="form-check-label" for="lieu-abj"
+                  >Abuja <small>(ABJ)</small></label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="lieu-enu"
+                  value="option6"
+                />
+                <label class="form-check-label" for="lieu-enu"
+                  >Enugu <small>(ENU)</small></label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="lieu-jos"
+                  value="option7"
+                />
+                <label class="form-check-label" for="lieu-jos"
+                  >Jos <small>(JOS)</small></label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="lieu-kad"
+                  value="option8"
+                />
+                <label class="form-check-label" for="lieu-kad"
+                  >Kaduna <small>(KAD)</small></label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="lieu-prt"
+                  value="option9"
+                />
+                <label class="form-check-label" for="lieu-prt"
+                  >Port Harcourt <small>(PRT)</small></label
+                >
+              </div>
+
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="lieu-waza"
+                  value="option10"
+                />
+                <label class="form-check-label" for="lieu-waza"
+                  >Wazobia radio, Abuja <small>(WAZA)</small></label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="lieu-wazk"
+                  value="option11"
+                />
+                <label class="form-check-label" for="lieu-wazk"
+                  >Wazobia radio,Kano <small>(WAZK)</small></label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="lieu-wazl"
+                  value="option12"
+                />
+                <label class="form-check-label" for="lieu-wazl"
+                  >Wazobia radio, Lagos <small>(WAZL)</small></label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="lieu-wazp"
+                  value="option13"
+                />
+                <label class="form-check-label" for="lieu-wazp"
+                  >Wazobia radio, Port Harcourt <small>(WAZP)</small></label
+                >
+              </div>
+              <br />
+            </div>
+          </div>
+
+          <div id="idCheckmenuSexe">
+            <p>
+              <button
+                class="btn btn-outline-success btn-sm btn-block"
+                type="button"
+                data-toggle="collapse"
+                data-target="#collapseBody2"
+                aria-expanded="false"
+                aria-controls="collapseBody"
+                id="sexe2"
+              >
+              SEXE
+              </button>
+            </p>
+            <div class="collapse" id="collapseBody2">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="checkF"
+                  value="option1"
+                />
+                <label class="form-check-label" for="checkF">F</label>
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="checkM"
+                  value="option2"
+                />
+                <label class="form-check-label" for="checkM">M</label>
+              </div>
+              <br />
+            </div>
+          </div>
+          <div id="idCheckmenuAge">
+            <p>
+              <button
+                class="btn btn-outline-success btn-sm btn-block"
+                type="button"
+                data-toggle="collapse"
+                data-target="#collapseBody3"
+                aria-expanded="false"
+                aria-controls="collapseBody"
+                id="age2"
+              >
+              AGE
+              </button>
+            </p>
+            <div class="collapse" id="collapseBody3">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="check15"
+                  value="option1"
+                />
+                <label class="form-check-label" for="check15">&lt; 15</label>
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="check30"
+                  value="option2"
+                />
+                <label class="form-check-label" for="check30">16-30</label>
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="check45"
+                  value="option3"
+                />
+                <label class="form-check-label" for="check45">31-45</label>
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="check60"
+                  value="option4"
+                />
+                <label class="form-check-label" for="check60">46-60</label>
+              </div>
+              <br />
+            </div>
+          </div>
+
+          <div id="idCheckmenuTypeTexte">
+            <p>
+              <button
+                class="btn btn-outline-success btn-sm btn-block"
+                type="button"
+                data-toggle="collapse"
+                data-target="#collapseBody4"
+                aria-expanded="false"
+                aria-controls="collapseBody"
+                id="genre2"
+              >TYPE TEXTE
+              </button>
+            </p>
+            <div class="collapse" id="collapseBody4">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="Drama"
+                  value="option1"
+                />
+                <label class="form-check-label" for="Drama">Drama</label>
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="Formalconversation"
+                  value="option2"
+                />
+                <label class="form-check-label" for="Formalconversation"
+                  >Formal conversation</label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="Informalconversation"
+                  value="option3"
+                />
+                <label class="form-check-label" for="Informalconversation"
+                  >Informal conversation</label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="Opinion"
+                  value="option4"
+                />
+                <label class="form-check-label" for="Opinion">Opinion</label>
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="Persuasionandinstruction"
+                  value="option5"
+                />
+                <label class="form-check-label" for="Persuasionandinstruction"
+                  >Persuasion and instruction</label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="Radioconversation"
+                  value="option6"
+                />
+                <label class="form-check-label" for="Radioconversation"
+                  >Radio conversation</label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="Radiomonologues"
+                  value="option7"
+                />
+                <label class="form-check-label" for="Radiomonologues"
+                  >Radio monologues</label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="Radioreadingnews"
+                  value="option8"
+                />
+                <label class="form-check-label" for="Radioreadingnews"
+                  >Radio reading news</label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="Religion"
+                  value="option9"
+                />
+                <label class="form-check-label" for="Religion">Religion</label>
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="Storytelling"
+                  value="option10"
+                />
+                <label class="form-check-label" for="Storytelling"
+                  >Storytelling</label
+                >
+              </div>
+              <br />
+            </div>
+          </div>
+
+          <div id="idCheckmenuGenre">
+            <p>
+              <button
+                class="btn btn-outline-success btn-sm btn-block"
+                type="button"
+                data-toggle="collapse"
+                data-target="#collapseBody5"
+                aria-expanded="false"
+                aria-controls="collapseBody"
+                id="nombreLocuteur2"
+              >
+              NOMBRE DE LOCUTEURS
+              </button>
+            </p>
+            <div class="collapse" id="collapseBody5">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="genrem"
+                  value="option1"
+                />
+                <label class="form-check-label" for="genrem">1</label>
+              </div>
+
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="genred"
+                  value="option2"
+                />
+                <label class="form-check-label" for="genred">2</label>
+              </div>
+
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="genret"
+                  value="option3"
+                />
+                <label class="form-check-label" for="genret">3</label>
+              </div>
+
+              <br />
+            </div>
+          </div>
+
+          <div id="idCheckmenuCompetence">
+            <p>
+              <button
+                class="btn btn-outline-success btn-sm btn-block"
+                type="button"
+                data-toggle="collapse"
+                data-target="#collapseBody6"
+                aria-expanded="false"
+                aria-controls="collapseBody"
+                id="competence2"
+              >
+              COMPETENCE
+              </button>
+            </p>
+            <div class="collapse" id="collapseBody6">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="COMPETENCEm"
+                  value="option1"
+                />
+                <label class="form-check-label" for="COMPETENCEm"
+                  >average <small>(M)</small></label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="COMPETENCEs"
+                  value="option2"
+                />
+                <label class="form-check-label" for="COMPETENCEs"
+                  >poor <small>(S)</small></label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="COMPETENCEw"
+                  value="option3"
+                />
+                <label class="form-check-label" for="COMPETENCEw"
+                  >good <small>(W)</small></label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="COMPETENCEww"
+                  value="option4"
+                />
+                <label class="form-check-label" for="COMPETENCEww"
+                  >very good <small>(WW)</small></label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="COMPETENCEx"
+                  value="option5"
+                />
+                <label class="form-check-label" for="COMPETENCEx"
+                  ><small>(X)</small></label
+                >
+              </div>
+              <br />
+            </div>
+          </div>
+          <div id="idCheckmenuEducation">
+            <p>
+              <button
+                class="btn btn-outline-success btn-sm btn-block"
+                type="button"
+                data-toggle="collapse"
+                data-target="#collapseBody7"
+                aria-expanded="false"
+                aria-controls="collapseBody"
+                id="education2"
+              >
+              EDUCATION
+              </button>
+            </p>
+            <div class="collapse" id="collapseBody7">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="EDUCATIONp"
+                  value="option1"
+                />
+                <label class="form-check-label" for="EDUCATIONp">Primary</label>
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="EDUCATIONs"
+                  value="option2"
+                />
+                <label class="form-check-label" for="EDUCATIONs"
+                  >Secondary</label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="EDUCATIONu"
+                  value="option3"
+                />
+                <label class="form-check-label" for="EDUCATIONu"
+                  >University</label
+                >
+              </div>
+              <br />
+            </div>
+          </div>
+
+          <div id="idCheckmenuMotherTongue">
+            <p>
+              <button
+                class="btn btn-outline-success btn-sm btn-block"
+                type="button"
+                data-toggle="collapse"
+                data-target="#collapseBody8"
+                aria-expanded="false"
+                aria-controls="collapseBody"
+                id="lanMater2"
+              >
+              LANGUE MATERNELLE
+              </button>
+            </p>
+            <div class="collapse" id="collapseBody8">
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="mothertongueEnglish"
+                  value="option1"
+                />
+                <label class="form-check-label" for="mothertongueEnglish"
+                  >English</label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="mothertongueYoruba"
+                  value="option2"
+                />
+                <label class="form-check-label" for="mothertongueYoruba"
+                  >Yoruba</label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="mothertongueIgbo"
+                  value="option3"
+                />
+                <label class="form-check-label" for="mothertongueIgbo"
+                  >Igbo</label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="mothertongueHausa"
+                  value="option4"
+                />
+                <label class="form-check-label" for="mothertongueHausa"
+                  >Hausa</label
+                >
+              </div>
+              <div class="form-check">
+                <input
+                  class="form-check-input"
+                  type="checkbox"
+                  id="mothertongueOther"
+                  value="option5"
+                />
+                <label class="form-check-label" for="mothertongueOther"
+                  >Other</label
+                >
+              </div>
+              <br />
+            </div>
+          </div>
+
+          <!-- fin facettes -->
+          <div>
+            <p>
+              <button
+                type="button"
+                class="btn btn-success btn-block"
+                id="specifs"
+                onclick="generation();getLanguage()"
+              >
+              Spécificités Partie Sélectionnée
+              </button>
+            </p>
+            <button type="button" class="btn btn-success" onclick="refresh()">
+              <img src="./images/controls.png" title="refresh" />
+            </button>
+            <br /><br />
+          </div>
+        </div>
+        <div class="col-8">
+          <br />
+          <!--<div id='wordCloud'></div>-->
+          <div id="placeholder" style="overflow-x: auto; overflow-y: auto;">
+            <p align="center">
+              <img src="./images/ilovenaija.jpg" /><br />
+              <img src="./images/itrameur-naija-welcome.png" /><br />
+              <small
+                ><span style="background-color: #5cb85c; color: white;"
+                  >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...<b id="chargement">Chargement en cours</b
+                  >...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span
+                ></small
+              ><br />
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      $(".collapse").collapse({ toggle: false });
+    </script>
+
+    <script language="JavaScript">
+      importUrlFile();
+    </script>
+
+    <script>
+      $(function() {
+        $('#expertID').change(function(){
+         expertCheck();
+        })
+      })
+    </script>
+
+  </body>
+</html>

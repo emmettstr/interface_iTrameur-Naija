@@ -1,0 +1,36 @@
+.row{
+  margin-left: 30px !important; 
+  margin-right: 30px !important; 
+}
+
+a[href], input[type='submit'], input[type='image'], label[for], select, button .pointer {
+       cursor: pointer;
+}
+
+table, th , td {
+    /*border: 1px solid grey;*/
+    border: thin solid #ccc;
+    border-collapse: collapse;
+    padding: 5px;
+    text-align:center;
+    font-size:11px
+}
+table tr:nth-child(odd) {
+    background-color: #dfdfdf;
+}
+table tr:nth-child(even) {
+    background-color: #ffffff;
+}
+th {
+    background:#5cb85c;
+}
+table td, table th {
+    border-right: thin solid #eee; border-bottom: thin solid #eee;
+}
+
+#SpecifPartie  td:nth-child(1) {cursor: pointer;}
+#specifsTotalesParties  td:nth-child(1) {cursor: pointer;}
+
+	/* .resp {
+    font-size: 1.3vw !important;
+  } */
