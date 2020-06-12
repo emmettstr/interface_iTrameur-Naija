@@ -2,6 +2,9 @@
   margin-left: 30px !important; 
   margin-right: 30px !important; 
 }
+ .navbar {
+  height: 45px;
+}
 
 a[href], input[type='submit'], input[type='image'], label[for], select, button .pointer {
        cursor: pointer;
@@ -30,6 +33,79 @@ table td, table th {
 
 #SpecifPartie  td:nth-child(1) {cursor: pointer;}
 #specifsTotalesParties  td:nth-child(1) {cursor: pointer;}
+
+
+
+#placeholder {
+    width: 800px;
+    margin: 1em auto;
+}
+#placeholder2 {
+    margin-right: auto; 
+    margin-left: auto; 
+    width: 800px;
+    height:0px;
+/*margin: 1em auto;*/
+/*display:table;*/
+}
+#placeholder2 #placeholderSource {
+    float:left;
+    width:49%; /* modif bitexte avril 2018 */ 
+}
+#placeholder2 #placeholderCible {
+    margin-left:51%   /* modif bitexte avril 2018 */ 
+}
+
+
+
+#contextehtml {
+    margin-right: auto; 
+    margin-left: auto; 
+    width: 800px;
+    border: 3px; 
+/*font-size:0.7em;*/
+}
+
+
+#contextehtml #placeholderSource1 {
+    float:left;
+    width:48%;
+}
+#contextehtml #placeholderCible1 {
+    margin-left:52%   
+}
+
+
+#contextehtml ins {
+     text-decoration: underline  red;
+}
+
+#contextehtml #placeholderSource1 ins {
+     text-decoration: underline  red;
+
+}
+
+#contextehtml #placeholderCible1 ins  {
+    text-decoration: underline  red;
+}
+
+
+
+#Global {
+    margin-right: auto; 
+    margin-left: auto; 
+    width: 98%; 
+    border: 3px; 
+    display:table;
+}
+#Global2 {
+    margin-right: auto; 
+    margin-left: auto; 
+    width: 98%; 
+    border: 3px; 
+}
+
+
 
 
 .audiojs { height: 22px; background: #404040;
@@ -75,4 +151,29 @@ table td, table th {
 .autofocus-current-word label,
 .playback-rate label {
     font-weight: bold;
+}
+
+.btnV {
+height: 26px;
+width: 26px;  
+background-image:url('../images/ventilation.png');
+background-repeat:no-repeat;
+}
+.btnS {
+height: 26px;
+width: 26px;  
+background-image:url('../images/section.png');
+background-repeat:no-repeat;
+}
+.btnC {
+height: 26px;
+width: 26px;  
+background-image:url('../images/concordance.png');
+background-repeat:no-repeat;
+}
+.btnA {
+height: 26px;
+width: 26px;  
+background-image:url('../images/select.png');
+background-repeat:no-repeat;
 }

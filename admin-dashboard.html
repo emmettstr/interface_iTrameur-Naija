@@ -15,12 +15,13 @@
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
     />
+	<!--<script type="text/javascript" language="javascript" src="./import/jquery-3.1.1.js"></script>-->
     <script src="import/jquery-3.4.1.min.js"></script>
+    <script src="import/chartist.min.js"></script>
+    <!--<script src="import/chartist.min.js.map"></script>-->
     <script src="import/chartist-plugin-legend.js"></script>
     <script src="import/chartist-plugin-zoom.js"></script>
     <link rel="stylesheet" href="import/chartist.min.css" />
-    <script src="import/chartist.min.js"></script>
-    <script src="import/chartist.min.js.map"></script>
     <script src="import/iTrameur-chart-src.js"></script>
 
     <script src="import/jQWCloud.js"></script>
@@ -36,7 +37,7 @@
     <script src="import/buttons.flash.min.js"></script>
     <script src="import/jszip.min.js"></script>
     <script src="import/pdfmake.min.js"></script>
-    <script src="import/pdfmake.min.js.map"></script>
+    <!--<script src="import/pdfmake.min.js.map"></script>-->
     <script src="import/buttons.html5.min.js"></script>
     <script src="import/buttons.print.min.js"></script>
     <script src="import/vfs_fonts.js"></script>
@@ -45,9 +46,13 @@
     <script src="import/FileSaver.js"></script>
     <link rel="stylesheet" href="import/awesomplete.css" />
     <script src="import/awesomplete.js"></script>
-    <link rel="stylesheet" href="./import/awesomplete.css" />
+
     <link rel="stylesheet" href="import/uprogress.css" />
     <script src="import/xregexp-all.js"></script>
+
+	<script type="text/javascript" language="javascript" src="./import/arbor/arbor.js"></script> 
+	<script type="text/javascript" language="javascript" src="./import/arbor/renderer.js"></script> 
+	<script type="text/javascript" language="javascript" src="./import/arbor/graphics.js"></script> 
 
     <!--<script src="import/audiojs/audio.js"></script>-->
     <script src="import/html5-audio-read-along-master/read-along.js"></script>
@@ -88,6 +93,10 @@
         });
         $("#delimiter").text(language.delimiter);
         $("#concordancier").text(language.concordancier);
+		$("#dependancylist").text(language.dependancylist);
+		$("#searchRelationLemmePos").text(language.searchRelationLemmePos);
+		$("#labelDependanceDisplay").text(language.labelDependanceDisplay);
+		//$("#labelDependanceDisplay2").text(language.labelDependanceDisplay2);
         $("#specifs").text(language.specifs);
         $("#specifsT").text(language.specifsT);
         // $("#modeE").text(language.modeE);
@@ -106,6 +115,7 @@
         $("#tip_clic").text(language.tip_clic);
         $("#tip_clic_suivant").text(language.tip_clic_suivant);
         $("#tip_lecteur").text(language.tip_lecteur);
+        $("#tip_lecteur2").text(language.tip_lecteur2);
         $("#specifPartie").text(language.specifPartie);
         $("#alert2").text(language.alert2);
         $("#alert1").text(language.alert1);
@@ -136,8 +146,9 @@
     </script> -->
 
     <script src="import/wz_tooltip.js"></script>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-      <div class="container">
+	<nav class="navbar navbar-expand-lg navbar-light bg-light justify-content-between">
+    <!--<nav class="navbar navbar-expand-lg navbar-light bg-light">-->
+      <!-- <div class="container"> -->
         <a class="navbar-brand"
           ><img  src="./images/itrameur.png" /><img
             src="./images/logo.png"
@@ -169,7 +180,7 @@
               >
             </li> -->
             <li class="nav-item">
-              <a class="nav-link" href="#"
+              <a class="nav-link" href="./help.html"
                 ><i class="fa fa-fw fa-info-circle"></i><b id="aide">Help</b></a
               >
             </li>
@@ -193,9 +204,65 @@
                 >
               </div>
             </li>
-            <li class="nav-item">&nbsp;&nbsp;&nbsp;&nbsp;</li>
-            <li class="nav-item">
-            <form class="form-inline float-right">
+          </ul>
+        </div>
+     <!-- </div> -->
+    </nav>
+	
+   <nav class="navbar navbar-expand-sm bg-dark navbar-dark justify-content-end">
+    <div class="collapse navbar-collapse flex-grow-1 text-right float-right" id="myNavbar7">
+	<ul class="navbar-nav ml-auto">
+			<li class="nav-item active">
+			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
+			<span class="navbar-toggler-icon"></span>
+			</button> 	
+			</li>
+			<li class="nav-item active">
+			<button
+              type="button"
+              class="btn btn-success ml-auto mr-1" 
+              onclick="searchRelationLemmePos();getLanguage();"
+              id="searchRelationLemmePos"
+			  style="display: none;"
+			>
+            Relation Display 
+            </button>
+			&nbsp;
+			<span class="navbar-text" id='IDrelationLabel' style="display: none;">Relation</span>&nbsp;<select id='IDRelation' style="display: none;"></select>
+			&nbsp;
+			</li>
+			
+		   <li class="nav-item active">
+		   
+		   
+		   <button
+              type="button"
+              class="btn btn-success ml-auto mr-1"
+              onclick="displayListDependency();getLanguage();"
+              id="dependancylist"
+			  style="display: none;"
+            >
+            Dépendant
+            </button> 		
+		   
+           <button
+              type="button"
+              class="btn btn-success ml-auto mr-1"
+              onclick="calculCoocNgram();getLanguage();"
+              id="cooccurrent"
+			  style="display: none;"
+            >
+            Cooccurrent
+            </button> 		
+			<button
+              type="button"
+              class="btn btn-success ml-auto mr-1"
+              onclick="concordance();getLanguage()"
+              id="concordancier"
+            >
+            Concordancier
+            </button>
+
             <div class="awesomplete">
               <div style="display: block;">
                 <input
@@ -209,37 +276,20 @@
                 />
               </div>
             </div>
-            &nbsp;
-            <div class="awesomplete">
-              <div id="yesno" style="display: none;">
-                <span class="paramlabel">Pôle cible</span>&nbsp;&nbsp;<input
-                  class="inputAwe"
-                  type="text"
-                  value="entrez la forme pôle"
-                  name="poleCible"
-                  id="poleCibleID"
-                  onclick="this.value=''"
-                />
-              </div>
-            </div>
             <input type="text" placeholder="10" id="lgcontexteID" size=2 />
-            &nbsp;
-            <button
-              type="button"
-              class="btn btn-success"
-              onclick="concordance();getLanguage()"
-              id="concordancier"
-            >
-            Concordancier
-            </button>
-            </button>
-          </form>
-            </li>
-          </ul>
-        </div>
-      </div>
+			</li>
+			<li class="nav-item active">
+			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
+			<span class="navbar-toggler-icon"></span>
+			</button> 	
+			</li>
+	 </ul>
+     </div>
     </nav>
-    <br />
+	
+	
+	
+    <!--<br />-->
     <div class="container-fluid">
       <div class="row justify-content-between">
       </div>
@@ -998,7 +1048,7 @@
             <p>
               <button
                 type="button"
-                class="btn btn-success btn-block"
+                class="btn btn-sm btn-success btn-block"
                 id="specifs"
                 onclick="generation();getLanguage()"
               >
@@ -1011,21 +1061,37 @@
             <br /><br />
           </div>
         </div>
-        <div class="col-8">
-          <br />
-          <!--<div id='wordCloud'></div>-->
-          <div id="placeholder" style="overflow-x: auto; overflow-y: auto;">
-            <p align="center">
-              <img src="./images/ilovenaija.jpg" /><br />
-              <img src="./images/itrameur-naija-welcome.png" /><br />
-              <small
-                ><span style="background-color: #5cb85c; color: white;"
-                  >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...<b id="chargement">Chargement en cours</b
-                  >...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span
-                ></small
-              ><br />
-            </p>
-          </div>
+        <div class="col-9">
+			<br />
+			<!--<div id='wordCloud'></div>-->
+			<div id="placeholder" style="overflow-x: auto; overflow-y: auto;">
+				<p align="center">
+				<img src="./images/ilovenaija.jpg" /><br />
+				<img src="./images/itrameur-naija-welcome.png" /><br />
+				<small><span style="background-color: #5cb85c; color: white;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...<b id="chargement">Chargement en cours</b>...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span
+                ></small><br />
+				</p>
+			</div>
+			<br/>
+			<div id="placeholder2" style="overflow-x:auto;overflow-y:auto;"></div>
+			<br/>
+			<div id="Global">	
+				<div id="page-analysis" class="ct-chart"></div>
+			</div>
+			<div id="Global2">
+				<div id="demo" style="overflow-x:auto;">
+					<div id="legendGraphe" style="width:100%"></div>
+					<div id="contentgrapheholder"><canvas id="grapheHolder" width="0" height="0"></canvas></div>
+					<div id="graph-analysis1" class="ct-chart"></div>
+					<div id="legend-graph-analysis1" class="ct-label"></div>
+					<div id="graph-analysis2" class="ct-chart" ></div>
+					<div id="legend-graph-analysis2" class="ct-label"></div>
+					<div id="graph-analysis3" class="ct-chart" ></div>
+					<div id="legend-graph-analysis3" class="ct-label"></div>
+				</div>
+				<div id="contextehtml" style="width:100%"></div>
+			</div>
+
         </div>
       </div>
     </div>

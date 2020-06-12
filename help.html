@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta name="description" content="iTrameur NAIJA" />
+
+    <!-- scripts / css -->
+    <script src="import/iTrameur.js"></script>
+    <link rel="stylesheet" href="import/iTrameur.css" />
+    <!--<link rel="stylesheet" href="import/mystyle.css" />-->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"
+    />
+    <script src="import/jquery-3.4.1.min.js"></script>
+    <script src="import/chartist-plugin-legend.js"></script>
+    <script src="import/chartist-plugin-zoom.js"></script>
+    <link rel="stylesheet" href="import/chartist.min.css" />
+    <script src="import/chartist.min.js"></script>
+    <script src="import/chartist.min.js.map"></script>
+    <script src="import/iTrameur-chart-src.js"></script>
+
+    <script src="import/jQWCloud.js"></script>
+
+    <!-- <script src="import/dataTables.bootstrap.js"></script>  ?? -->
+    <link href="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/css/bootstrap4-toggle.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/js/bootstrap4-toggle.min.js"></script>
+    <script src="import/jquery.dataTables.js"></script>
+    <script src="import/jquery.highlight.js"></script>
+    <script src="import/dataTables.searchHighlight.min.js"></script>
+    <link rel="stylesheet" href="import/jquery.dataTables.min.css" />
+    <script src="import/dataTables.buttons.min.js"></script>
+    <script src="import/buttons.flash.min.js"></script>
+    <script src="import/jszip.min.js"></script>
+    <script src="import/pdfmake.min.js"></script>
+    <script src="import/pdfmake.min.js.map"></script>
+    <script src="import/buttons.html5.min.js"></script>
+    <script src="import/buttons.print.min.js"></script>
+    <script src="import/vfs_fonts.js"></script>
+    <link rel="stylesheet" href="import/dataTables.searchHighlight.css" />
+
+    <script src="import/FileSaver.js"></script>
+    <link rel="stylesheet" href="import/awesomplete.css" />
+    <script src="import/awesomplete.js"></script>
+    <link rel="stylesheet" href="./import/awesomplete.css" />
+    <link rel="stylesheet" href="import/uprogress.css" />
+    <script src="import/xregexp-all.js"></script>
+
+    <!--<script src="import/audiojs/audio.js"></script>-->
+    <script src="import/html5-audio-read-along-master/read-along.js"></script>
+    <script src="import/html5-audio-read-along-master/main.js"></script>
+
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+      integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+      integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+      crossorigin="anonymous"
+    ></script>
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+      integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+      crossorigin="anonymous"
+    />
+    <title>iTrameur-Naija</title>
+    <!-- <link rel="stylesheet" href="admin-dashboard.css" /> -->
+  </head>
+  <body>
+    <script>
+      var language;
+      function getLanguage() {
+        localStorage.getItem("language") == null ? setLanguage("en") : false;
+        $.ajax({
+          url: "./langues/" + localStorage.getItem("language") + ".json",
+          dataType: "json",
+          async: false,
+          dataType: "json",
+          success: function (lang) {
+            language = lang;
+          },
+        });
+        $("#accueil").text(language.accueil);
+        $("#quest").text(language.quest);
+        $("#lecture").text(language.lecture);
+        $("#audio").text(language.audio);
+        $("#interface").text(language.interface);
+        $("#interface1").html(language.interface1);
+        $("#quest_title").text(language.quest_title);
+        $("#lecture_title").text(language.lecture_title);
+        $("#audio_title").text(language.audio_title);
+        $("#quest_content").html(language.quest_content);
+        $("#lecture_content1").text(language.lecture_content1);
+        $("#lecture_content2").text(language.lecture_content2);
+        $("#audio_content").text(language.audio_content);
+        $("#exp_btn").attr('title',language.exp_btn);
+      }
+      function setLanguage(lang) {
+        localStorage.setItem("language", lang);
+
+      }
+    </script>
+    <script>
+      $(document).ready(function () {
+        getLanguage();
+      });
+    </script>
+    <script>
+      $(function () {
+        $('[data-toggle="tooltip"]').tooltip()
+      })
+    </script>
+    <script src="import/wz_tooltip.js"></script>
+    <nav class="navbar fixed-top navbar-expand-lg navbar-light bg-light justify-content-between">
+      <!-- <div class="container"> -->
+        <a class="navbar-brand"
+          ><img  src="./images/itrameur.png" /><img
+            src="./images/logo.png"
+        /></a>
+        <!-- <div class="form-check form-check-inline">
+        <input type="checkbox" data-toggle="toggle" data-onstyle="success"  data-size="sm" height="50%" id="expertID" onclick="expertCheck();"><label class="form-check-label">&nbsp;Expert</label>
+        </div>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-toggle="collapse"
+          data-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button> -->
+       <div class="form-check form-check-inline">
+        <a href="./help-expert.html">
+        <button type="button" class="btn btn-secondary" data-toggle="tooltip" data-placement="bottom" id="exp_btn" title="Découvrez le mode expert">Off
+        </button></a><label class="form-check-label">&nbsp;Expert</label>
+       </div>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav ml-auto">
+            <li class="nav-item">
+              <a class="nav-link" href="./admin-dashboard.html"
+                ><i class="fa fa-fw fa-home"></i><b id="accueil">Home</b></a
+              >
+            </li>
+
+            <li class="nav-item">
+              <a class="nav-link" href="#quest_section"
+                ><i class="fa fa-fw fa-info-circle"></i><b id="quest">Quest</b></a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#lecture_section"
+                ><i class="fa fa-fw fa-book"></i><b id="lecture">Lecture</b></a
+              >
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#audio_section"
+                ><i class="fa fa-fw fa-quote-left"></i><b id="audio">Audio</b></a
+              >
+            </li>
+            <li class="nav-item dropdown">
+              <a
+                class="nav-link dropdown-toggle"
+                href="#"
+                id="navbarDropdown"
+                role="button"
+                data-toggle="dropdown"
+                aria-haspopup="true"
+                aria-expanded="false"
+                ><i class="fa fa-fw fa-globe"></i><b id="langues">Languages</b>
+              </a>
+              <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                <a class="dropdown-item" href="#" onclick="setLanguage('en');getLanguage();"
+                  >English</a
+                >
+                <a class="dropdown-item" href="#" onclick="setLanguage('fr');getLanguage();"
+                  >Français</a
+                >
+              </div>
+            </li>
+            <li class="nav-item">&nbsp;&nbsp;&nbsp;&nbsp;</li>
+          </ul>
+        </div>
+      <!-- </div> -->
+    </nav>
+    <br/>
+    <div class="row">
+    <div class="bg-light container-fluid col-8 mx-auto" style="margin-top: 60px;">
+      <div class="card" style="margin-top: 20px;">
+        <h5 class="card-header" id="interface">Cette interface permet :</h5>
+        <div class="card-body">
+        <p class="card-text " id="interface1">- d'explorer les données Naija via les opérations textométriques "classiques" : concordancier, spécificités, cooccurrents, etc.<br/><br/>
+     - d'explorer les données Naija au niveau sociolinguistique.</p>
+        </div>
+      </div>
+      <div class="card" id="quest_section" style="margin-top: 20px;">
+        <h5 class="card-header" style="background-color: #e3f2fd;" id="quest_title">Requête</h5>
+        <div class="card-body">
+        <p class="card-text " align="justify" id="quest_content">Une fois que la base est chargée, vous trouverez à gauche une série de boutons pour délimiter vos choix. <br/><br/>
+          Cliquez sur des boutons qui vous intéressent et choisissez un critère par facette. <code>i.e. SEX : F, AGE : &lt; 15</code> si vous voulez observer l'indice de spécificité des mots chez les filles de moins de 15 ans. Puis cliquez sur le bouton <code>Spécificités partie sélectionnée</code> en bas pour générer le résultat induit par vos choix.</p>
+        <img src="./images/help1.jpg" width="100%">
+        </div>
+      </div>
+      <div class="card" id="lecture_section" style="margin-top: 20px;">
+        <h5 class="card-header" style="background-color: #e3f2fd;" id="lecture_title">Lecture de résultat</h5>
+        <div class="card-body">
+        <p class="card-text " id="lecture_content1">Un nuage de mots disposé. Plus la taille de la police est grande, plus l'indice de spécificité du mot (sa sur-représentation dans les facettes choisies) est élevée. </p>
+        <img src="./images/help2.jpg" width="100%">
+        <br/>
+        <br/>
+        <p class="card-text" id="lecture_content2">Cliquez sur un mot pour afficher le mot en contexte dans un concordancier.</p>
+        <img src="./images/help3.jpg" width="100%">
+        </div>
+      </div>
+      <div class="card" id="audio_section" style="margin-top: 20px;">
+        <h5 class="card-header" style="background-color: #e3f2fd;" id="audio_title">Son</h5>
+        <div class="card-body">
+        <p class="card-text" id="audio_content">Vous pouvez cliquer sur un mot pour écouter la prononciation de ce terme ou éventuellement l'échantillon complet.</p>
+        <img src="./images/help4.jpg" width="100%">
+        </div>
+      </div>
+      <!-- <div class="card" id="mode_section" style="margin-top: 20px;">
+        <h5 class="card-header" style="background-color: #e3f2fd;">Mode</h5>
+        <div class="card-body">
+        <p class="card-text"></p>
+        <img src="./images/help5.jpg" width="100%">
+        </div>
+      </div> -->
+      </div>
+      </div>
+    </div>
+    <br/>
+    <br/>
+  <!-- Footer -->
+<footer class="page-footer font-small ">
+  <!-- Footer Links -->
+<!--  <div class="container text-center text-md-left">-->
+<!--    <div class="row">-->
+<!--      <hr class="clearfix w-100 d-md-none">-->
+<!--      &lt;!&ndash; Grid column &ndash;&gt;-->
+<!--      <div class="col-md-3 mx-auto">-->
+<!--        &lt;!&ndash; Links &ndash;&gt;-->
+<!--      </div>-->
+<!--      <hr class="clearfix w-100 d-md-none">-->
+<!--      <div class="col-md-4 mx-auto">-->
+<!--        <h5 class="font-weight-bold text-uppercase mt-3 mb-4">Related Links</h5>-->
+<!--        <ul class="list-unstyled">-->
+<!--          <li>-->
+<!--            <a href="#!">Link 1</a>-->
+<!--          </li>-->
+<!--          <li>-->
+<!--            <a href="#!">Link 2</a>-->
+<!--          </li>-->
+<!--        </ul>-->
+
+<!--      </div>-->
+<!--      &lt;!&ndash; Grid column &ndash;&gt;-->
+
+<!--      <hr class="clearfix w-100 d-md-none">-->
+
+<!--      &lt;!&ndash; Grid column &ndash;&gt;-->
+<!--      <div class="col-md-4 mx-auto">-->
+
+<!--        &lt;!&ndash; Links &ndash;&gt;-->
+<!--        <h5 class="font-weight-bold text-uppercase mt-3 mb-4">About</h5>-->
+
+<!--        <ul class="list-unstyled">-->
+<!--          <li>-->
+<!--            <a href="#!">Link 1</a>-->
+<!--          </li>-->
+<!--          <li>-->
+<!--            <a href="#!">Link 2</a>-->
+<!--          </li>-->
+<!--        </ul>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </div>-->
+  <!-- Footer Links -->
+  <!-- Copyright -->
+  <div class="bg-dark text-white text-center py-3">
+    <a href="http://naijasyncor.huma-num.fr/">NAIJASYNCOR</a> 2020 © ALL RIGHTS RESERVED
+  </div>
+  <!-- Copyright -->
+</footer>
+<!-- Footer -->
+  </body>
+</html>

@@ -6,6 +6,7 @@ var DictionnaireSource = new Object();
 var DictionnaireLemme = new Object();
 var DictionnaireCategorie = new Object();
 var DictionnaireAnnotation = new Object();
+var DictionnaireDesRelations = new Object();
 var dicForme2num = new Object();
 var dicNum2forme = new Object();
 var dicLemme2num = new Object();
@@ -15,10 +16,14 @@ var dicNum2categorie = new Object();
 var dicAnnotation2num = new Object();
 var dicNum2annotation = new Object();
 var dictionnairedesparties=new Object();	
+var dictionnairedespositionsdesrelationsentrelemmes=new Object();
+var dictionnairedesfrequencesdesrelationsentrelemmes=new Object();
+var positionsMaximisantlesrelations= new Array;
 
 var annotationencours = 2;
 var annotationencoursOUT = 1;
 var nombredannotation=1;
+var relation_annot_For_grapherelation=6;
 
 var trameForme = new Object();
 var cadre = new Object();
@@ -34,7 +39,13 @@ var NBDELIMSource=0;
 
 var PARTITION_DEFAULT="BIRTH_PLACE";
 var PARTIE_DEFAULT="";
+
 var awesomplete;
+var awesompleteC;
+var awesompleteSR;
+var awesomplete2dependance1;
+var awesomplete2dependance2;
+
 var LISTEMOTSource=[];
 var listepartieTomerge=[]; // liste pour stocker les parties à fusionner
 var listepartitionTomerge=[];	// liste pour stocker les partitions à fusionner
@@ -45,6 +56,11 @@ var sendIdSelectNumber=0;
 var FQmax=0;
 var seuil=5;
 
+var GrapheArborL=900;
+var GrapheArborH=900;
+
+var LISTEDESNOEUDSINCANVAS=[];
+var sysArbor;
 //----------------------------------------------------------------------------------
 function expertCheck() {
 	if (document.getElementById('expertID').checked) {
@@ -69,6 +85,34 @@ function expertCheck() {
 		} else {
 			x.style.display = "none";
 		}
+		x = document.getElementById('cooccurrent');
+		if (x.style.display === "none") {
+			$('#cooccurrent').show();
+        
+		} else {
+			x.style.display = "none";
+		}
+		x = document.getElementById('searchRelationLemmePos');
+		if (x.style.display === "none") {
+			$('#searchRelationLemmePos').show();
+        
+		} else {
+			x.style.display = "none";
+		}
+		x = document.getElementById('IDrelationLabel');
+		if (x.style.display === "none") {
+			$('#IDrelationLabel').show();
+        
+		} else {
+			x.style.display = "none";
+		}		
+		x = document.getElementById('IDRelation');
+		if (x.style.display === "none") {
+			$('#IDRelation').show();
+        
+		} else {
+			x.style.display = "none";
+		}		
 		console.log("check1 : "+annotationencours)
 	}
 	else {
@@ -85,6 +129,38 @@ function expertCheck() {
 		} else {
 			x.style.display = "none";
 		}
+		x = document.getElementById('cooccurrent');
+		if (x.style.display === "none") {
+			$('#cooccurrent').show();
+        
+		} else {
+			x.style.display = "none";
+		}
+		x = document.getElementById('searchRelationLemmePos');
+		if (x.style.display === "none") {
+			$('#searchRelationLemmePos').show();
+        
+		} else {
+			x.style.display = "none";
+		}
+		x = document.getElementById('IDrelationLabel');
+		if (x.style.display === "none") {
+			$('#IDrelationLabel').show();
+        
+		} else {
+			x.style.display = "none";
+		}		
+		x = document.getElementById('IDRelation');
+		if (x.style.display === "none") {
+			$('#IDRelation').show();
+        
+		} else {
+			x.style.display = "none";
+		}		
+
+		
+		
+		
 		console.log("check0 : "+annotationencours)
 	}
 	refresh();
@@ -112,7 +188,7 @@ String.prototype.replaceAll = function(token, newToken, ignoreCase) {
 };
 //----------------------------------------------------------------------------------
 function importUrlFile() {
-    fetch("naija2test_2304.txt")
+    fetch("naija2test_2805.txt")
 	.then(response => response.text())
 	.then(function(data) {
 	    FILEINPUTTOREAD = data;
@@ -121,6 +197,7 @@ function importUrlFile() {
 }
 //----------------------------------------------------------------------------------
 function refresh() {
+	refreshItrameur();
     PARTITION_DEFAULT="BIRTH_PLACE";
     PARTIE_DEFAULT="";
     var inputs = document.querySelectorAll('.form-check-input'); 
@@ -142,6 +219,8 @@ function refresh() {
 }
 //----------------------------------------------------------------------------------
 function generation() {	
+
+    refreshItrameur();
  
    // LIEU naissance
     
@@ -464,7 +543,7 @@ function generation() {
          
     }
     else if (listepartitionTomerge.length == 0) {
-		var vide="... il faut sélectionner au moins une facette...";
+		var vide="<span id='alert2'>... il faut sélectionner au moins une facette...</span>";
 		$("#placeholder").html(vide);
 		PARTITION_DEFAULT="BIRTH_PLACE";
 		
@@ -667,6 +746,8 @@ function CalcCoeffSpec(T, t, F, f, seuilS, fffffff) {
 }
 //----------------------------------------------------------------------------------
 function importBase() {
+	
+	refreshItrameur();
     sendIdNumber=0;
     DictionnaireSource = new Object();
     DictionnaireLemme = new Object();
@@ -764,6 +845,7 @@ function importBase() {
 		LISTEDEMOTS.push(newannot);		
 	    // le reste sont les annotation complémentaires traitees infra....
 	    nombredannotation = 3 + LISTEDEMOTS.length;
+		DictionnaireDesRelations[LISTEDEMOTS[3]]=1;
 	    //---------------------------------------------------------------------------------
 	    //alert("TYPE:"+type+"|POS:"+pos+"|FORME:"+forme+"|LEMME:"+lemme+"|CAT:"+categorie);
 	    if (type == "delim") {
@@ -805,6 +887,7 @@ function importBase() {
 			forme = new String(forme);
 			if (forme == "constructor") {forme=forme+"⠀"}; //{forme = "Constructor";}
 			if (forme == "length") {forme=forme+"⠀"}; //{forme = "Constructor";}
+			//if (forme == "dat") {forme=forme+"⠀"}; //{forme = "Constructor";}
 			//-------------------------------------------------------------------------------------
 			if (!(forme in dicForme2num)) {
 				numeroapparitionsurlatrameForme++;
@@ -826,6 +909,7 @@ function importBase() {
 			lemme = new String(lemme);
 			if (lemme == "constructor") {lemme=lemme+"⠀"}; //{lemme = "Constructor";}
 			if (lemme == "length") {lemme=lemme+"⠀"}; //{lemme = "Constructor";}
+			//if (lemme == "dat") {lemme=lemme+"⠀"}; //{lemme = "Constructor";}
 			//-------------------------------------------------------------------------------------
 			if (!(lemme in dicLemme2num)) {
 				numeroapparitionsurlatrameLemme++;
@@ -932,609 +1016,664 @@ function importBase() {
     //--------------------------------------------
     // ajout du dico pour la suggestion automatique dans le pole
     var input = document.getElementById("poleID");
-    //var inputC = document.getElementById("poleCibleID");
     awesomplete = new Awesomplete(input);
     LISTEMOTSource=[];
     LISTEMOTSource= Object.keys(DictionnaireLemme).sort(function(a,b){
 	return a < b ? 1 : a > b ? -1 : 0;
     });
     awesomplete.list = LISTEMOTSource;
-    //awesompleteC = new Awesomplete(inputC);
     //--------------------------------------------
+	var LISTERELATIONS=Object.keys(DictionnaireDesRelations).sort(function(a,b){
+			return a > b ? 1 : a < b ? -1 : 0;
+		});
+	//console.log("RELATION : "+LISTERELATIONS);
+	// A DEBRIDER....
+	//LISTERELATIONS.unshift("ANY");
+	//..........
+
+	$('#IDRelation option').remove();
+	$('#IDRelation').append( '<option value="ANY">ANY</option>' );
+	for (var i = 0; i < LISTERELATIONS.length; i++) { 
+		if ((LISTERELATIONS[i] != "_") && (LISTERELATIONS[i].toUpperCase().search("ROOT") == -1) && (LISTERELATIONS[i].toUpperCase().search("PUNCT") == -1))  {
+		$('#IDRelation').append( '<option value="'+LISTERELATIONS[i].toUpperCase()+'">'+LISTERELATIONS[i].toUpperCase()+'</option>' );
+		}
+	}
+	//--------------------------------------------
     console.log("Nombre de send_id : "+ sendIdNumber);
     specifsTotalesParties(PARTITION);
+    getLanguage();
 }
 //----------------------------------------------------------------------------------
 function concordance() {
-  
-  var lgcontexte = document.getElementById("lgcontexteID").value;
-  if (lgcontexte == "") {
+    refreshItrameur();
+    var lgcontexte = document.getElementById("lgcontexteID").value;
+    if (lgcontexte == "") {
 	document.getElementById("lgcontexteID").value = 10;
 	lgcontexte=10;
-  }
-  var DictionnaireDesItems = new Object();
-  var DictionnaireNumDesItems = new Object();
-  var DictionnaireDesItemsOut = new Object();
-  var DictionnaireNumDesItemsOut = new Object();
-  if (nombredannotation > 1) {
-    if (annotationencours == 1) {
-      DictionnaireDesItems = jQuery.extend({}, DictionnaireSource);
-      DictionnaireNumDesItems = jQuery.extend({}, dicNum2forme);
-      if (annotationencours != annotationencoursOUT) {
-        if (annotationencoursOUT == 2) {
-          DictionnaireDesItemsOut = jQuery.extend({}, DictionnaireLemme);
-          DictionnaireNumDesItemsOut = jQuery.extend({}, dicNum2lemme);
-        }
-        if (annotationencoursOUT == 3) {
-          DictionnaireDesItemsOut = jQuery.extend({}, DictionnaireCategorie);
-          DictionnaireNumDesItemsOut = jQuery.extend({}, dicNum2categorie);
-        }
-        if (annotationencoursOUT > 3) {
-          DictionnaireDesItemsOut = jQuery.extend({}, DictionnaireAnnotation);
-          DictionnaireNumDesItemsOut = jQuery.extend({}, dicNum2annotation);
-        }
-      }
     }
-    if (annotationencours == 2) {
-      DictionnaireDesItems = jQuery.extend({}, DictionnaireLemme);
-      DictionnaireNumDesItems = jQuery.extend({}, dicNum2lemme);
-      if (annotationencours != annotationencoursOUT) {
-        if (annotationencoursOUT == 1) {
-          DictionnaireDesItemsOut = jQuery.extend({}, DictionnaireSource);
-          DictionnaireNumDesItemsOut = jQuery.extend({}, dicNum2forme);
-        }
-        if (annotationencoursOUT == 3) {
-          DictionnaireDesItemsOut = jQuery.extend({}, DictionnaireCategorie);
-          DictionnaireNumDesItemsOut = jQuery.extend({}, dicNum2categorie);
-        }
-        if (annotationencoursOUT > 3) {
-          DictionnaireDesItemsOut = jQuery.extend({}, DictionnaireAnnotation);
-          DictionnaireNumDesItemsOut = jQuery.extend({}, dicNum2annotation);
-        }
-      }
-    }
-    if (annotationencours == 3) {
-      DictionnaireDesItems = jQuery.extend({}, DictionnaireCategorie);
-      DictionnaireNumDesItems = jQuery.extend({}, dicNum2categorie);
-      if (annotationencours != annotationencoursOUT) {
-        if (annotationencoursOUT == 1) {
-          DictionnaireDesItemsOut = jQuery.extend({}, DictionnaireSource);
-          DictionnaireNumDesItemsOut = jQuery.extend({}, dicNum2forme);
-        }
-        if (annotationencoursOUT == 2) {
-          DictionnaireDesItemsOut = jQuery.extend({}, DictionnaireLemme);
-          DictionnaireNumDesItemsOut = jQuery.extend({}, dicNum2lemme);
-        }
-        if (annotationencoursOUT > 3) {
-          DictionnaireDesItemsOut = jQuery.extend({}, DictionnaireAnnotation);
-          DictionnaireNumDesItemsOut = jQuery.extend({}, dicNum2annotation);
-        }
-      }
-    }
-    if (annotationencours > 3) {
-      DictionnaireDesItems = jQuery.extend({}, DictionnaireAnnotation);
-      DictionnaireNumDesItems = jQuery.extend({}, dicNum2annotation);
-      if (annotationencours != annotationencoursOUT) {
-        if (annotationencoursOUT == 1) {
-          DictionnaireDesItemsOut = jQuery.extend({}, DictionnaireSource);
-          DictionnaireNumDesItemsOut = jQuery.extend({}, dicNum2forme);
-        }
-        if (annotationencoursOUT == 2) {
-          DictionnaireDesItemsOut = jQuery.extend({}, DictionnaireLemme);
-          DictionnaireNumDesItemsOut = jQuery.extend({}, dicNum2lemme);
-        }
-        if (annotationencoursOUT == 3) {
-          DictionnaireDesItemsOut = jQuery.extend({}, DictionnaireCategorie);
-          DictionnaireNumDesItemsOut = jQuery.extend({}, dicNum2categorie);
-        }
-        if (annotationencoursOUT > 3) {
-          DictionnaireDesItemsOut = jQuery.extend({}, DictionnaireAnnotation);
-          DictionnaireNumDesItemsOut = jQuery.extend({}, dicNum2annotation);
-        }
-      }
-    }
-  } else {
-    DictionnaireDesItems = jQuery.extend({}, DictionnaireSource);
-    DictionnaireNumDesItems = jQuery.extend({}, dicNum2forme);
-  }
-  var annotationencoursIndex = annotationencours - 1;
-  var annotationencoursIndexOUT = annotationencoursOUT - 1;
-
-  var queryText = document.getElementById("poleID").value;
-  if (queryText == "") {
-    var vide =
-      '<small><span style="text-align:center; border: 1pt dotted #939393 ; padding: 1pt; margin-left: 0px; margin-right: 0px; background:red">Entrez un pôle pour pouvoir lancer le calcul...</span></small>';
-    $("#placeholder").html(vide);
-    return;
-  }
-  // on cherche si plusieurs pôles ont été fournis
-  var reg0 = new RegExp(" +$", "g");
-  queryText = queryText.replace(reg0, "");
-  var reg1 = new RegExp("^ +", "g");
-  queryText = queryText.replace(reg1, "");
-  var reg2 = new RegExp(" +", "g");
-  queryText = queryText.replace(reg2, " ");
-  var listQueryTextInput = queryText.split(" ");
-  var nombreMotif = 0;
-  var listQueryTextOutput = [];
-  for (var j = 0; j < listQueryTextInput.length; j++) {
-    if (annotationencours <= 3) {
-      if (listQueryTextInput[j] in DictionnaireDesItems) {
-        nombreMotif++;
-        listQueryTextOutput.push(listQueryTextInput[j]);
-      }
+    var DictionnaireDesItems = new Object();
+    var DictionnaireNumDesItems = new Object();
+    var DictionnaireDesItemsOut = new Object();
+    var DictionnaireNumDesItemsOut = new Object();
+    if (nombredannotation > 1) {
+	if (annotationencours == 1) {
+	    DictionnaireDesItems = jQuery.extend({}, DictionnaireSource);
+	    DictionnaireNumDesItems = jQuery.extend({}, dicNum2forme);
+	    if (annotationencours != annotationencoursOUT) {
+		if (annotationencoursOUT == 2) {
+		    DictionnaireDesItemsOut = jQuery.extend({}, DictionnaireLemme);
+		    DictionnaireNumDesItemsOut = jQuery.extend({}, dicNum2lemme);
+		}
+		if (annotationencoursOUT == 3) {
+		    DictionnaireDesItemsOut = jQuery.extend({}, DictionnaireCategorie);
+		    DictionnaireNumDesItemsOut = jQuery.extend({}, dicNum2categorie);
+		}
+		if (annotationencoursOUT > 3) {
+		    DictionnaireDesItemsOut = jQuery.extend({}, DictionnaireAnnotation);
+		    DictionnaireNumDesItemsOut = jQuery.extend({}, dicNum2annotation);
+		}
+	    }
+	}
+	if (annotationencours == 2) {
+	    DictionnaireDesItems = jQuery.extend({}, DictionnaireLemme);
+	    DictionnaireNumDesItems = jQuery.extend({}, dicNum2lemme);
+	    if (annotationencours != annotationencoursOUT) {
+		if (annotationencoursOUT == 1) {
+		    DictionnaireDesItemsOut = jQuery.extend({}, DictionnaireSource);
+		    DictionnaireNumDesItemsOut = jQuery.extend({}, dicNum2forme);
+		}
+		if (annotationencoursOUT == 3) {
+		    DictionnaireDesItemsOut = jQuery.extend({}, DictionnaireCategorie);
+		    DictionnaireNumDesItemsOut = jQuery.extend({}, dicNum2categorie);
+		}
+		if (annotationencoursOUT > 3) {
+		    DictionnaireDesItemsOut = jQuery.extend({}, DictionnaireAnnotation);
+		    DictionnaireNumDesItemsOut = jQuery.extend({}, dicNum2annotation);
+		}
+	    }
+	}
+	if (annotationencours == 3) {
+	    DictionnaireDesItems = jQuery.extend({}, DictionnaireCategorie);
+	    DictionnaireNumDesItems = jQuery.extend({}, dicNum2categorie);
+	    if (annotationencours != annotationencoursOUT) {
+		if (annotationencoursOUT == 1) {
+		    DictionnaireDesItemsOut = jQuery.extend({}, DictionnaireSource);
+		    DictionnaireNumDesItemsOut = jQuery.extend({}, dicNum2forme);
+		}
+		if (annotationencoursOUT == 2) {
+		    DictionnaireDesItemsOut = jQuery.extend({}, DictionnaireLemme);
+		    DictionnaireNumDesItemsOut = jQuery.extend({}, dicNum2lemme);
+		}
+		if (annotationencoursOUT > 3) {
+		    DictionnaireDesItemsOut = jQuery.extend({}, DictionnaireAnnotation);
+		    DictionnaireNumDesItemsOut = jQuery.extend({}, dicNum2annotation);
+		}
+	    }
+	}
+	if (annotationencours > 3) {
+	    DictionnaireDesItems = jQuery.extend({}, DictionnaireAnnotation);
+	    DictionnaireNumDesItems = jQuery.extend({}, dicNum2annotation);
+	    if (annotationencours != annotationencoursOUT) {
+		if (annotationencoursOUT == 1) {
+		    DictionnaireDesItemsOut = jQuery.extend({}, DictionnaireSource);
+		    DictionnaireNumDesItemsOut = jQuery.extend({}, dicNum2forme);
+		}
+		if (annotationencoursOUT == 2) {
+		    DictionnaireDesItemsOut = jQuery.extend({}, DictionnaireLemme);
+		    DictionnaireNumDesItemsOut = jQuery.extend({}, dicNum2lemme);
+		}
+		if (annotationencoursOUT == 3) {
+		    DictionnaireDesItemsOut = jQuery.extend({}, DictionnaireCategorie);
+		    DictionnaireNumDesItemsOut = jQuery.extend({}, dicNum2categorie);
+		}
+		if (annotationencoursOUT > 3) {
+		    DictionnaireDesItemsOut = jQuery.extend({}, DictionnaireAnnotation);
+		    DictionnaireNumDesItemsOut = jQuery.extend({}, dicNum2annotation);
+		}
+	    }
+	}
     } else {
-      var tmpannot = annotationencours + "//" + listQueryTextInput[j];
-      if (tmpannot in DictionnaireDesItems) {
-        nombreMotif++;
-        listQueryTextOutput.push(listQueryTextInput[j]);
-      }
+	DictionnaireDesItems = jQuery.extend({}, DictionnaireSource);
+	DictionnaireNumDesItems = jQuery.extend({}, dicNum2forme);
     }
-  }
-  if (nombreMotif == 0) {
-    var vide =
-      '<small><span style="text-align:center; border: 1pt dotted #939393 ; padding: 1pt; margin-left: 0px; margin-right: 0px; background:red">Le pôle choisi n\'est pas dans le dictionnaire...</span></small>';
-    $("#placeholder").html(vide);
-    return;
-  }
-  var table = "";
-  table += '<table id="CONCORDANCE" class="display" width="100%">';
-  /*--------------------------*/
-  // var PARTITION = document.getElementById("IDPartie").value;
-  var PARTITION = PARTITION_DEFAULT;
-  // la partition à afficher est soit : 
-     // - LIEU par exemple si aucune facette n'a été sélectionnée
-     // - soit la partition induite par les facettes (SEX-AGE)
-	 // - soit uniquement la partie induite par les facettes (F -15)
-  //------------------------
-  var LISTESDESPARTIES = new Object();
-  var DicoDesPositionsDesPartiesPourSections = new Object();
-  var positionMaxG = 0;
-  var positionMaxD = 0;
-  if (PARTITION != "") {
-      LISTESDESPARTIES = Object.keys(cadre[PARTITION]);
-      for (var j = 0; j < LISTESDESPARTIES.length; j++) {
-	  var listepositions = cadre[PARTITION][LISTESDESPARTIES[j]];
-	  for (var k = 0; k < listepositions.length; k = k + 2) {
-              var deb = listepositions[k];
-              var tmpk = k + 1;
-              var fin = listepositions[tmpk];
-              DicoDesPositionsDesPartiesPourSections[deb] =
-		  PARTITION + "=" + LISTESDESPARTIES[j] + "//" + deb + "//" + fin;
-              /*DicoDesPositionsDesPartiesPourSections[fin]="ENDPARTIE";*/
-	  }
-      }
-      //var firstIndexTrame=Object.keys(trameForme)[0];
-      //var j=Number(firstIndexTrame);
-      //for (var k=1;k<firstIndexTrame;k++) {
-      //    if (k in DicoDesPositionsDesPartiesPourSections) {
-      //	table+= '<tr><td></td><td><span style="font-size:11px;color:red;font-weight: bold;font-variant: small-caps;">'+DicoDesPositionsDesPartiesPourSections[k]+'</span></td><td></td><td></td></tr>';
-      //    }
-      //}
-  } 
+    var annotationencoursIndex = annotationencours - 1;
+    var annotationencoursIndexOUT = annotationencoursOUT - 1;
+    
+    var queryText = document.getElementById("poleID").value;
+    if (queryText == "") {
+	var vide ='<small><span id="alert3" style="text-align:center; border: 1pt dotted #939393 ; padding: 1pt; margin-left: 0px; margin-right: 0px; background:red">Entrez un pôle pour pouvoir lancer le calcul...</span></small>';
+	$("#placeholder").html(vide);
+	return;
+    }
+    // on cherche si plusieurs pôles ont été fournis
+    var reg0 = new RegExp(" +$", "g");
+    queryText = queryText.replace(reg0, "");
+    var reg1 = new RegExp("^ +", "g");
+    queryText = queryText.replace(reg1, "");
+    var reg2 = new RegExp(" +", "g");
+    queryText = queryText.replace(reg2, " ");
+    var listQueryTextInput = queryText.split(" ");
+    var nombreMotif = 0;
+    var listQueryTextOutput = [];
+    for (var j = 0; j < listQueryTextInput.length; j++) {
+	if (annotationencours <= 3) {
+	    if (listQueryTextInput[j] in DictionnaireDesItems) {
+		nombreMotif++;
+		listQueryTextOutput.push(listQueryTextInput[j]);
+	    }
+	} 
+	else {
+	    var tmpannot = annotationencours + "//" + listQueryTextInput[j];
+	    if (tmpannot in DictionnaireDesItems) {
+		nombreMotif++;
+		listQueryTextOutput.push(listQueryTextInput[j]);
+	    }
+	}
+    }
+    if (nombreMotif == 0) {
+	var vide ='<small><span style="text-align:center; border: 1pt dotted #939393 ; padding: 1pt; margin-left: 0px; margin-right: 0px; background:red" id="alert1">Le pôle choisi n\'est pas dans le dictionnaire...</span></small>';
+	$("#placeholder").html(vide);
+	return;
+    }
+    var insertaudio="<audioFilePosition id=\"AudioNaija\" style=\"background-color: #2fcf2d;color:black\"><small id='tip_lecteur'>(clic sur un mot : lecture fichier audio)</small></audioFilePosition><p><hr/></p>";
+    //$("#placeholder").html("");
+    //$("#placeholder").html(insertaudio);
+    document.getElementById("placeholder").innerHTML ="";
+    document.getElementById("placeholder").innerHTML =insertaudio;
+    var table = "";
+    table += '<div id=\"passage-text\" class=\"passage\"><table id="CONCORDANCE" class="display" width="100%">';
+    /*--------------------------*/
+    // var PARTITION = document.getElementById("IDPartie").value;
+    var PARTITION = PARTITION_DEFAULT;
+    // la partition à afficher est soit : 
+    // - LIEU par exemple si aucune facette n'a été sélectionnée
+    // - soit la partition induite par les facettes (SEX-AGE)
+    // - soit uniquement la partie induite par les facettes (F -15)
+    //------------------------
+    var LISTESDESPARTIES = new Object();
+    var DicoDesPositionsDesPartiesPourSections = new Object();
+    var positionMaxG = 0;
+    var positionMaxD = 0;
+    if (PARTITION != "") {
+	LISTESDESPARTIES = Object.keys(cadre[PARTITION]);
+	for (var j = 0; j < LISTESDESPARTIES.length; j++) {
+	    var listepositions = cadre[PARTITION][LISTESDESPARTIES[j]];
+	    for (var k = 0; k < listepositions.length; k = k + 2) {
+		var deb = listepositions[k];
+		var tmpk = k + 1;
+		var fin = listepositions[tmpk];
+		DicoDesPositionsDesPartiesPourSections[deb] = PARTITION + "=" + LISTESDESPARTIES[j] + "//" + deb + "//" + fin;
+		/*DicoDesPositionsDesPartiesPourSections[fin]="ENDPARTIE";*/
+	    }
+	}
+	//var firstIndexTrame=Object.keys(trameForme)[0];
+	//var j=Number(firstIndexTrame);
+	//for (var k=1;k<firstIndexTrame;k++) {
+	//    if (k in DicoDesPositionsDesPartiesPourSections) {
+	//	table+= '<tr><td></td><td><span style="font-size:11px;color:red;font-weight: bold;font-variant: small-caps;">'+DicoDesPositionsDesPartiesPourSections[k]+'</span></td><td></td><td></td></tr>';
+	//    }
+	//}
+    } 
     else {
 	positionMaxG = 0;
 	positionMaxD = positionsurlatrame;
-  }
-  /*--------------------------*/
-  var nbContexte = 0;
-  var partieEnCours = "";
-  for (var index in trameForme) {
-    if (index in DicoDesPositionsDesPartiesPourSections) {
-      if (DicoDesPositionsDesPartiesPourSections[index] != "ENDPARTIE") {
-        var DDDD = DicoDesPositionsDesPartiesPourSections[index].split("//");
-        var labelPartie = DDDD[0];
-        positionMaxG = Number(DDDD[1]);
-        positionMaxD = Number(DDDD[2]);
-        //	table+= '<tr><td></td><td><span style="font-size:11px;color:red;font-weight: bold;font-variant: small-caps;">'+labelPartie+'</span></td><td></td><td></td></tr>';
-      }
     }
-    var item =
-      DictionnaireNumDesItems[trameForme[index][annotationencoursIndex]];
-    if (!(dicNum2forme[trameForme[index][0]] in dictionnairedesdelims)) {
-      var VERIFitem = "BAD";
-      for (var z = 0; z < listQueryTextOutput.length; z++) {
-        if (item == listQueryTextOutput[z]) {
-          VERIFitem = "OK";
-        }
-      }
-
-      if (VERIFitem == "OK") {
-        var contexteG = "";
-        var contexteD = "";
-        var nbItemGauche = 0;
-        var nbItemDroite = 0;
-        /* a droite */
-        var posIndex = Number(index) + 1;
-        while (nbItemDroite <= lgcontexte) {
-          if (posIndex in trameForme && posIndex <= positionMaxD) {
-            var item2;
-            if (annotationencours != annotationencoursOUT) {
-              item2 =
-                DictionnaireNumDesItemsOut[
-                  trameForme[posIndex][annotationencoursIndexOUT]
-                ];
-            } else {
-              item2 =
-                DictionnaireNumDesItems[
-                  trameForme[posIndex][annotationencoursIndex]
-                ];
-            }
-
-            if (
-              !(dicNum2forme[trameForme[posIndex][0]] in dictionnairedesdelims)
-            ) {
-              nbItemDroite++;
-              if (nombredannotation > 1) {
-                if (nombredannotation > 3) {
-                  contexteD +=
-                    '<a style="text-decoration:none" href="#" onmouseover="Tip(\'<p>Position : ' +
-                    posIndex +
-                    "<br/>(1):" +
-                    dicNum2forme[trameForme[posIndex][0]] +
-                    "<br/>(2):" +
-                    dicNum2lemme[trameForme[posIndex][1]] +
-                    "<br/>(3):" +
-                    dicNum2categorie[trameForme[posIndex][2]];
-                  for (
-                    var tmpAnnot = 3;
-                    tmpAnnot < nombredannotation;
-                    tmpAnnot++
-                  ) {
-                    var kk = tmpAnnot + 1;
-                    contexteD +=
-                      "<br/>(" +
-                      kk +
-                      "):" +
-                      dicNum2annotation[trameForme[posIndex][tmpAnnot]];
-                  }
-                  // if (
-                  //   (document.getElementById("numAnnotRelationID").value ==
-                  //     "") |
-                  //   (document.getElementById("relationID").value == "")
-                  // ) {
-                  //   contexteD +=
-                  //     '</p>\')" onmouseout="UnTip()" rel="' +
-                  //     item2 +
-                  //     '">' +
-                  //     item2 +
-                  //     "</a>";
-                  // } else {
-                    var rel = "REL";
-                    var ident = "6";
-                    ident = Number(ident);
-                    var listerel2 =
-                      dicNum2annotation[trameForme[posIndex][ident - 1]];
-                    var ListeDependanceAtThisPos = listerel2.split(",");
-                    var test = "bad";
-                    for (
-                      var nbDepAtThisPos = 0;
-                      nbDepAtThisPos < ListeDependanceAtThisPos.length;
-                      nbDepAtThisPos++
-                    ) {
-                      var rel2 = ListeDependanceAtThisPos[nbDepAtThisPos];
-                      rel2 = rel2.replaceAll("(", "//");
-                      rel2 = rel2.replaceAll(")", "");
-                      var Lrel = rel2.split("//");
-                      if (
-                        (rel == Lrel[0] || rel == "ANY") &&
-                        Lrel[1] == index
-                      ) {
-                        test = "ok";
-                      }
-                    }
-                    if (test == "ok") {
-                      contexteD +=
-                        '</p>\')" onmouseout="UnTip()" rel="' +
-                        item2 +
-                        '"><span style="background-color:yellow">' +
-                        item2 +
-                        "</span></a>";
-                    } else {
-                      contexteD +=
-                        '</p>\')" onmouseout="UnTip()" rel="' +
-                        item2 +
-                        '">' +
-                        item2 +
-                        "</a>";
-                    }
-                  // }
-                } else {
-                  contexteD +=
-                    '<a style="text-decoration:none" href="#" onmouseover="Tip(\'<p>Position : ' +
-                    posIndex +
-                    "<br/>(1):" +
-                    dicNum2forme[trameForme[posIndex][0]] +
-                    "<br/>(2):" +
-                    dicNum2lemme[trameForme[posIndex][1]] +
-                    "<br/>(3):" +
-                    dicNum2categorie[trameForme[posIndex][2]] +
-                    '</p>\')" onmouseout="UnTip()" rel="' +
-                    item2 +
-                    '">' +
-                    item2 +
-                    "</a>";
-                }
-              } else {
-                contexteD += item2;
-              }
-            } else {
-              //contexteD+=item2;
-              contexteD += item2;
-            }
-            posIndex++;
-          } else {
-            nbItemDroite = lgcontexte + 1;
-          }
-        }
-        /* a gauche */
-        posIndex = Number(index) - 1;
-        while (nbItemGauche <= lgcontexte) {
-          if (posIndex in trameForme && posIndex > positionMaxG) {
-            var item2;
-            if (annotationencours != annotationencoursOUT) {
-              item2 =
-                DictionnaireNumDesItemsOut[
-                  trameForme[posIndex][annotationencoursIndexOUT]
-                ];
-            } else {
-              item2 =
-                DictionnaireNumDesItems[
-                  trameForme[posIndex][annotationencoursIndex]
-                ];
-            }
-            if (
-              !(dicNum2forme[trameForme[posIndex][0]] in dictionnairedesdelims)
-            ) {
-              nbItemGauche++;
-              if (nombredannotation > 1) {
-                if (nombredannotation > 3) {
-                  var tmpContext =
-                    '<a style="text-decoration:none" href="#" onmouseover="Tip(\'<p>Position : ' +
-                    posIndex +
-                    "<br/>(1):" +
-                    dicNum2forme[trameForme[posIndex][0]] +
-                    "<br/>(2):" +
-                    dicNum2lemme[trameForme[posIndex][1]] +
-                    "<br/>(3):" +
-                    dicNum2categorie[trameForme[posIndex][2]];
-                  for (
-                    var tmpAnnot = 3;
-                    tmpAnnot < nombredannotation;
-                    tmpAnnot++
-                  ) {
-                    var kk = tmpAnnot + 1;
-                    tmpContext +=
-                      "<br/>(" +
-                      kk +
-                      "):" +
-                      dicNum2annotation[trameForme[posIndex][tmpAnnot]];
-                  }
-                  // if (
-                  //   (document.getElementById("numAnnotRelationID").value ==
-                  //     "") |
-                  //   (document.getElementById("relationID").value == "")
-                  // ) {
-                  //   tmpContext +=
-                  //     '</p>\')" onmouseout="UnTip()" rel="' +
-                  //     item2 +
-                  //     '">' +
-                  //     item2 +
-                  //     "</a>";
-                  //   contexteG = tmpContext + contexteG;
-                  // } else {
-                    var rel = "REL";
-                    var ident = "6";
-                    ident = Number(ident);
-                    var listerel2 =
-                      dicNum2annotation[trameForme[posIndex][ident - 1]];
-                    var ListeDependanceAtThisPos = listerel2.split(",");
-                    var test = "bad";
-                    for (
-                      var nbDepAtThisPos = 0;
-                      nbDepAtThisPos < ListeDependanceAtThisPos.length;
-                      nbDepAtThisPos++
-                    ) {
-                      var rel2 = ListeDependanceAtThisPos[nbDepAtThisPos];
-                      rel2 = rel2.replaceAll("(", "//");
-                      rel2 = rel2.replaceAll(")", "");
-                      var Lrel = rel2.split("//");
-                      if (
-                        (rel == Lrel[0] || rel == "ANY") &&
-                        Lrel[1] == index
-                      ) {
-                        test = "ok";
-                      }
-                    }
-                    if (test == "ok") {
-                      tmpContext +=
-                        '</p>\')" onmouseout="UnTip()" rel="' +
-                        item2 +
-                        '"><span style="background-color:yellow">' +
-                        item2 +
-                        "</span></a>";
-                      contexteG = tmpContext + contexteG;
-                    } else {
-                      tmpContext +=
-                        '</p>\')" onmouseout="UnTip()" rel="' +
-                        item2 +
-                        '">' +
-                        item2 +
-                        "</a>";
-                      contexteG = tmpContext + contexteG;
-                    }
-                  // }
-                } else {
-                  contexteG =
-                    '<a style="text-decoration:none" href="#" onmouseover="Tip(\'<p>Position : ' +
-                    posIndex +
-                    "<br/>(1):" +
-                    dicNum2forme[trameForme[posIndex][0]] +
-                    "<br/>(2):" +
-                    dicNum2lemme[trameForme[posIndex][1]] +
-                    "<br/>(3):" +
-                    dicNum2categorie[trameForme[posIndex][2]] +
-                    '</p>\')" onmouseout="UnTip()" rel="' +
-                    item2 +
-                    '">' +
-                    item2 +
-                    "</a>" +
-                    contexteG;
-                }
-              } else {
-                contexteG = item2 + contexteG;
-              }
-            } else {
-              contexteG = item2 + contexteG;
-            }
-            posIndex--;
-          } else {
-            nbItemGauche = lgcontexte + 1;
-          }
-        }
-        nbContexte++;
-        /* MODIF 2018 ****************************************************/
-        var TMPPARTIENAME = "";
-        if (PARTITION != "") {
-          LISTESDESPARTIES = Object.keys(cadre[PARTITION]);
-          for (var j = 0; j < LISTESDESPARTIES.length; j++) {
-            var listepositions = cadre[PARTITION][LISTESDESPARTIES[j]];
-            for (var k = 0; k < listepositions.length; k = k + 2) {
-              var deb = Number(listepositions[k]);
-              var tmpk = k + 1;
-              var fin = Number(listepositions[tmpk]);
-              var tmpIndex = Number(index);
-              if (tmpIndex <= fin && tmpIndex >= deb) {
-                TMPPARTIENAME = LISTESDESPARTIES[j];
-              }
-            }
-          }
-        }
-        /****************************************************************/
-        if (nombredannotation > 1) {
-          var item;
-          if (annotationencours != annotationencoursOUT) {
-            item =
-              DictionnaireNumDesItemsOut[
-                trameForme[index][annotationencoursIndexOUT]
-              ];
-          } else {
-            item =
-              DictionnaireNumDesItems[
-                trameForme[index][annotationencoursIndex]
-              ];
-          }
-
-          if (nombredannotation > 3) {
-            table +=
-              '<tr><td width="2%">' +
-              nbContexte +
-              "</td><td>" +
-              TMPPARTIENAME +
-              '</td><td style="text-align:right;" width="45%">' +
-              contexteG +
-              '</td><td style="text-align:center;" width="8%"><a style="text-decoration:none" href="#" onmouseover="Tip(\'<p>Position : ' +
-              index +
-              "<br/>(1):" +
-              dicNum2forme[trameForme[index][0]] +
-              "<br/>(2):" +
-              dicNum2lemme[trameForme[index][1]] +
-              "<br/>(3):" +
-              dicNum2categorie[trameForme[index][2]];
-            for (var tmpAnnot = 3; tmpAnnot < nombredannotation; tmpAnnot++) {
-              var kk = tmpAnnot + 1;
-              table +=
-                "<br/>(" +
-                kk +
-                "):" +
-                dicNum2annotation[trameForme[index][tmpAnnot]];
-            }
-            table +=
-              '</p>\')" onmouseout="UnTip()" rel="' +
-              item +
-              '">' +
-              item +
-              '</a></td><td style="text-align:left;" width="45%">' +
-              contexteD +
-              "</td></tr>";
-          } else {
-            table +=
-              '<tr><td width="2%">' +
-              nbContexte +
-              "</td><td>" +
-              TMPPARTIENAME +
-              '</td><td style="text-align:right;" width="45%">' +
-              contexteG +
-              '</td><td style="text-align:center;" width="8%"><a style="text-decoration:none" href="#" onmouseover="Tip(\'<p>(1):' +
-              dicNum2forme[trameForme[index][0]] +
-              "<br/>(2):" +
-              dicNum2lemme[trameForme[index][1]] +
-              "<br/>(3):" +
-              dicNum2categorie[trameForme[index][2]] +
-              '</p>\')" onmouseout="UnTip()" rel="' +
-              item +
-              '">' +
-              item +
-              '</a></td><td style="text-align:left;" width="45%">' +
-              contexteD +
-              "</td></tr>";
-          }
-        } else {
-          table +=
-            '<tr><td width="2%">' +
-            nbContexte +
-            "</td><td>" +
-            TMPPARTIENAME +
-            '</td><td style="text-align:right;" width="45%">' +
-            contexteG +
-            '</td><td style="text-align:center;" width="8%">' +
-            item +
-            '</td><td style="text-align:left;" width="45%">' +
-            contexteD +
-            "</td></tr>";
-        }
-      }
+    /*--------------------------*/
+    var nbContexte = 0;
+    var partieEnCours = "";
+    for (var index in trameForme) {
+	if (index in DicoDesPositionsDesPartiesPourSections) {
+	    if (DicoDesPositionsDesPartiesPourSections[index] != "ENDPARTIE") {
+		var DDDD = DicoDesPositionsDesPartiesPourSections[index].split("//");
+		var labelPartie = DDDD[0];
+		positionMaxG = Number(DDDD[1]);
+		positionMaxD = Number(DDDD[2]);
+		//	table+= '<tr><td></td><td><span style="font-size:11px;color:red;font-weight: bold;font-variant: small-caps;">'+labelPartie+'</span></td><td></td><td></td></tr>';
+	    }
+	}
+	var item = DictionnaireNumDesItems[trameForme[index][annotationencoursIndex]];
+	if (!(dicNum2forme[trameForme[index][0]] in dictionnairedesdelims)) {
+	    var VERIFitem = "BAD";
+	    for (var z = 0; z < listQueryTextOutput.length; z++) {
+		if (item == listQueryTextOutput[z]) {
+		    VERIFitem = "OK";
+		}
+	    }
+	    if (VERIFitem == "OK") {
+		var contexteG = "";
+		var contexteD = "";
+		var nbItemGauche = 0;
+		var nbItemDroite = 0;
+		/* a droite */
+		var posIndex = Number(index) + 1;
+		while (nbItemDroite <= lgcontexte) {
+		    if ((posIndex in trameForme) && (posIndex <= positionMaxD)) {
+			var item2;
+			if (annotationencours != annotationencoursOUT) {
+			    item2=DictionnaireNumDesItemsOut[trameForme[posIndex][annotationencoursIndexOUT]];
+			} 
+			else {
+			    item2=DictionnaireNumDesItems[trameForme[posIndex][annotationencoursIndex]];
+			}
+			
+			if (!(dicNum2forme[trameForme[posIndex][0]] in dictionnairedesdelims)) {
+			    nbItemDroite++;
+			    if (nombredannotation > 1) {
+				if (nombredannotation > 3) {
+				    contexteD +='<a style="text-decoration:none" href="#" onmouseover="Tip(\'<p>Position : ' +
+					posIndex +
+					"<br/>(1):" +
+					dicNum2forme[trameForme[posIndex][0]] +
+					"<br/>(2):" +
+					dicNum2lemme[trameForme[posIndex][1]] +
+					"<br/>(3):" +
+					dicNum2categorie[trameForme[posIndex][2]];
+				    var audioFile=dicNum2annotation[trameForme[posIndex][9]];
+					var paraAudio=dicNum2annotation[trameForme[posIndex][8]];
+					//console.log("D : "+paraAudio);
+					var listParaAudio=paraAudio.split("|");
+					//console.log("D : "+listParaAudio);
+					var beginWord=listParaAudio[0];
+					//var endWord=listParaAudio[1];
+					var LvaluebeginWord=beginWord.split("=");
+					//var LvalueendWord=endWord.split("=");
+					var valuebeginWord=Number(LvaluebeginWord[1])/1000;
+					valuebeginWord=Math.trunc(valuebeginWord);
+					//var valueendWord=Number(LvalueendWord[1])/1000;
+					//var valueDurationWord=valueendWord-valuebeginWord;
+				    //console.log("G:"+audioFile);
+				    for (var tmpAnnot = 3;tmpAnnot < nombredannotation;tmpAnnot++) {
+					var kk = tmpAnnot + 1;
+					contexteD +="<br/>(" +
+					    kk +
+					    "):" +
+					    dicNum2annotation[trameForme[posIndex][tmpAnnot]];
+				    }
+				    // if (
+				    //   (document.getElementById("numAnnotRelationID").value ==
+				    //     "") |
+				    //   (document.getElementById("relationID").value == "")
+				    // ) {
+				    //   contexteD +=
+				    //     '</p>\')" onmouseout="UnTip()" rel="' +
+				    //     item2 +
+				    //     '">' +
+				    //     item2 +
+				    //     "</a>";
+				    // } else {
+				    var rel = document.getElementById('IDRelation').value;
+					// var = "REL" ; Inutile pour ce type de concordance
+				    var ident = relation_annot_For_grapherelation;
+				    ident = Number(ident);
+				    var listerel2 =dicNum2annotation[trameForme[posIndex][ident - 1]];
+				    var ListeDependanceAtThisPos = listerel2.split(",");
+				    var test = "bad";
+				    for (var nbDepAtThisPos = 0;nbDepAtThisPos < ListeDependanceAtThisPos.length;nbDepAtThisPos++) {
+						var rel2 = ListeDependanceAtThisPos[nbDepAtThisPos];
+						rel2 = rel2.replaceAll("(", "//");
+						rel2 = rel2.replaceAll(")", "");
+						var Lrel = rel2.split("//");
+						if ((rel == Lrel[0] || rel == "ANY") &&	(Lrel[1] == index)) {
+							test = "ok";
+						}
+				    }
+				    if (test == "ok") {
+					contexteD +='</p>\')" onmouseout="UnTip()" onclick="getLanguage();playAudioNaija(\''+audioFile+'#t='+valuebeginWord+',10\');return false;" rel="' +
+					    item2 +
+					    '"><span style="background-color:yellow">' +
+					    item2 +
+					    "</span></a>";
+				    } 
+				    else {
+					contexteD +='</p>\')" onmouseout="UnTip()" onclick="getLanguage();playAudioNaija(\''+audioFile+'#t='+valuebeginWord+',10\');return false;" rel="' +
+					    item2 +
+					    '" >' +
+					    item2 +
+					    "</a>";
+				    }
+				    // }
+				} 
+				else {
+				    contexteD +='<a style="text-decoration:none" href="#" onmouseover="Tip(\'<p>Position : ' +
+					posIndex +
+					"<br/>(1):" +
+					dicNum2forme[trameForme[posIndex][0]] +
+					"<br/>(2):" +
+					dicNum2lemme[trameForme[posIndex][1]] +
+					"<br/>(3):" +
+					dicNum2categorie[trameForme[posIndex][2]] +
+					'</p>\')" onmouseout="UnTip()" rel="' +
+					item2 +
+					'">' +
+					item2 +
+					"</a>";
+				}
+			    } 
+			    else {
+				contexteD += item2;
+			    }
+			} 
+			else {
+			    //contexteD+=item2;
+			    contexteD += item2;
+			}
+			posIndex++;
+		    } 
+		    else {
+			nbItemDroite = lgcontexte + 1;
+		    }
+		}
+		/* a gauche */
+		posIndex = Number(index) - 1;
+		while (nbItemGauche <= lgcontexte) {
+		    if ((posIndex in trameForme) && (posIndex > positionMaxG)) {
+			var item2;
+			if (annotationencours != annotationencoursOUT) {
+			    item2 =DictionnaireNumDesItemsOut[trameForme[posIndex][annotationencoursIndexOUT]];
+			} 
+			else {
+			    item2 =DictionnaireNumDesItems[trameForme[posIndex][annotationencoursIndex]];
+			}
+			if (!(dicNum2forme[trameForme[posIndex][0]] in dictionnairedesdelims)) {
+			    nbItemGauche++;
+			    if (nombredannotation > 1) {
+				if (nombredannotation > 3) {
+				    var tmpContext =
+					'<a style="text-decoration:none" href="#" onmouseover="Tip(\'<p>Position : ' +
+					posIndex +
+					"<br/>(1):" +
+					dicNum2forme[trameForme[posIndex][0]] +
+					"<br/>(2):" +
+					dicNum2lemme[trameForme[posIndex][1]] +
+					"<br/>(3):" +
+					dicNum2categorie[trameForme[posIndex][2]];
+				    var audioFile=dicNum2annotation[trameForme[posIndex][9]];
+					var paraAudio=dicNum2annotation[trameForme[posIndex][8]];
+					//console.log(posIndex+ "G :"+paraAudio);
+					var listParaAudio=paraAudio.split("|");
+					//console.log(posIndex+ " G :"+listParaAudio);
+					var beginWord=listParaAudio[0];
+					//var endWord=listParaAudio[1];
+					var LvaluebeginWord=beginWord.split("=");
+					//var LvalueendWord=endWord.split("=");
+					var valuebeginWord=Number(LvaluebeginWord[1])/1000;
+					valuebeginWord=Math.trunc(valuebeginWord);
+					//var valueendWord=Number(LvalueendWord[1])/1000;
+					//var valueDurationWord=valueendWord-valuebeginWord;
+				    //console.log("G:"+audioFile);
+				    for (var tmpAnnot = 3;tmpAnnot < nombredannotation;tmpAnnot++) {
+						var kk = tmpAnnot + 1;
+						tmpContext +="<br/>(" +
+					    kk +
+					    "):" +
+					    dicNum2annotation[trameForme[posIndex][tmpAnnot]];
+				    }
+				    // if (
+				    //   (document.getElementById("numAnnotRelationID").value ==
+				    //     "") |
+				    //   (document.getElementById("relationID").value == "")
+				    // ) {
+				    //   tmpContext +=
+				    //     '</p>\')" onmouseout="UnTip()" rel="' +
+				    //     item2 +
+				    //     '">' +
+				    //     item2 +
+				    //     "</a>";
+				    //   contexteG = tmpContext + contexteG;
+				    // } else {
+				    var rel = document.getElementById('IDRelation').value;
+					// var = "REL" ; Inutile pour ce type de concordance
+				    var ident = relation_annot_For_grapherelation;
+				    ident = Number(ident);
+				    var listerel2 = dicNum2annotation[trameForme[posIndex][ident - 1]];
+				    var ListeDependanceAtThisPos = listerel2.split(",");
+				    var test = "bad";
+				    for (var nbDepAtThisPos = 0;nbDepAtThisPos < ListeDependanceAtThisPos.length;nbDepAtThisPos++) {
+						var rel2 = ListeDependanceAtThisPos[nbDepAtThisPos];
+						rel2 = rel2.replaceAll("(", "//");
+						rel2 = rel2.replaceAll(")", "");
+						var Lrel = rel2.split("//");
+						if (((rel == Lrel[0]) || (rel == "ANY")) &&	(Lrel[1] == index)) {
+							test = "ok";
+						}
+				    }
+				    if (test == "ok") {
+						tmpContext +='</p>\')" onmouseout="UnTip()" onclick="getLanguage();playAudioNaija(\''+audioFile+'#t='+valuebeginWord+',10\');return false;" rel="' +
+					    item2 +
+					    '"><span style="background-color:yellow">' +
+					    item2 +
+					    "</span></a>";
+						contexteG = tmpContext + contexteG;
+				    } 
+				    else {
+						tmpContext +='</p>\')" onmouseout="UnTip()" onclick="playAudioNaija(\''+audioFile+'#t='+valuebeginWord+',10\');return false;" rel="' +
+					    item2 +
+					    ' ">' +
+					    item2 +
+					    "</a>";
+						contexteG = tmpContext + contexteG;
+				    }
+				    // }
+				} 
+				else {
+				    contexteG =	'<a style="text-decoration:none" href="#" onmouseover="Tip(\'<p>Position : ' +
+					posIndex +
+					"<br/>(1):" +
+					dicNum2forme[trameForme[posIndex][0]] +
+					"<br/>(2):" +
+					dicNum2lemme[trameForme[posIndex][1]] +
+					"<br/>(3):" +
+					dicNum2categorie[trameForme[posIndex][2]] +
+					'</p>\')" onmouseout="UnTip()" rel="' +
+					item2 +
+					'">' +
+					item2 +
+					"</a>" +
+					contexteG;
+				}
+			    } 
+			    else {
+				contexteG = item2 + contexteG;
+			    }
+			} 
+			else {
+			    contexteG = item2 + contexteG;
+			}
+			posIndex--;
+		    } else {
+			nbItemGauche = lgcontexte + 1;
+		    }
+		}
+		nbContexte++;
+		/* MODIF 2018 ****************************************************/
+		var TMPPARTIENAME = "";
+		if (PARTITION != "") {
+		    LISTESDESPARTIES = Object.keys(cadre[PARTITION]);
+		    for (var j = 0; j < LISTESDESPARTIES.length; j++) {
+			var listepositions = cadre[PARTITION][LISTESDESPARTIES[j]];
+			for (var k = 0; k < listepositions.length; k = k + 2) {
+			    var deb = Number(listepositions[k]);
+			    var tmpk = k + 1;
+			    var fin = Number(listepositions[tmpk]);
+			    var tmpIndex = Number(index);
+			    if (tmpIndex <= fin && tmpIndex >= deb) {
+				TMPPARTIENAME = LISTESDESPARTIES[j];
+			    }
+			}
+		    }
+		}
+		/****************************************************************/
+		if (nombredannotation > 1) {
+		    var item;
+		    if (annotationencours != annotationencoursOUT) {
+			item = DictionnaireNumDesItemsOut[trameForme[index][annotationencoursIndexOUT]];
+		    } 
+		    else {
+			item = DictionnaireNumDesItems[trameForme[index][annotationencoursIndex]];
+		    }
+		    
+		    if (nombredannotation > 3) {
+			table +=
+			'<tr><td width="2%">' +
+			    nbContexte +
+			    "</td><td>" +
+			    TMPPARTIENAME +
+			    '</td><td style="text-align:right;" width="45%">' +
+			    contexteG +
+			    '</td><td style="text-align:center;" width="8%"><a style="text-decoration:none" href="#" onmouseover="Tip(\'<p>Position : ' +
+			    index +
+			    "<br/>(1):" +
+			    dicNum2forme[trameForme[index][0]] +
+			    "<br/>(2):" +
+			    dicNum2lemme[trameForme[index][1]] +
+			    "<br/>(3):" +
+			    dicNum2categorie[trameForme[index][2]];
+			var audioFile=dicNum2annotation[trameForme[index][9]];
+			var paraAudio=dicNum2annotation[trameForme[index][8]];
+			var listParaAudio=paraAudio.split("|");
+			//console.log(listParaAudio);
+			var beginWord=listParaAudio[0];
+			//var endWord=listParaAudio[1];
+			var LvaluebeginWord=beginWord.split("=");
+			//var LvalueendWord=endWord.split("=");
+			var valuebeginWord=Number(LvaluebeginWord[1])/1000;
+			valuebeginWord=Math.trunc(valuebeginWord);
+			//var valueendWord=Number(LvalueendWord[1])/1000;
+			//var valueDurationWord=valueendWord-valuebeginWord;
+				  //console.log("G:"+audioFile);
+			for (var tmpAnnot = 3; tmpAnnot < nombredannotation; tmpAnnot++) {
+			    var kk = tmpAnnot + 1;
+			    table +=
+			    "<br/>(" +
+				kk +
+				"):" +
+				dicNum2annotation[trameForme[index][tmpAnnot]];
+			}
+			table +=
+			'</p>\')" onmouseout="UnTip()" onclick="playAudioNaija(\''+audioFile+'#t='+valuebeginWord+',10\');return false;" rel="' +
+			    item +
+			    '" >' +
+			    item +
+			    '</a></td><td style="text-align:left;" width="45%">' +
+			    contexteD +
+			    "</td></tr>";
+		    } 
+		    else {
+			table +=
+			'<tr><td width="2%">' +
+			    nbContexte +
+			    "</td><td>" +
+			    TMPPARTIENAME +
+			    '</td><td style="text-align:right;" width="45%">' +
+			    contexteG +
+			    '</td><td style="text-align:center;" width="8%"><a style="text-decoration:none" href="#" onmouseover="Tip(\'<p>(1):' +
+			    dicNum2forme[trameForme[index][0]] +
+			    "<br/>(2):" +
+			    dicNum2lemme[trameForme[index][1]] +
+			    "<br/>(3):" +
+			    dicNum2categorie[trameForme[index][2]] +
+			    '</p>\')" onmouseout="UnTip()" rel="' +
+			    item +
+			    '">' +
+			    item +
+			    '</a></td><td style="text-align:left;" width="45%">' +
+			    contexteD +
+			    "</td></tr>";
+		    }
+		} 
+		else {
+		    table +=
+		    '<tr><td width="2%">' +
+			nbContexte +
+			"</td><td>" +
+			TMPPARTIENAME +
+			'</td><td style="text-align:right;" width="45%">' +
+			contexteG +
+			'</td><td style="text-align:center;" width="8%">' +
+			item +
+			'</td><td style="text-align:left;" width="45%">' +
+			contexteD +
+			"</td></tr>";
+		}
+	    }
+	}
     }
-  }
-  table += "</table>";
-
-  $("#placeholder").html(table);
-  $(document).ready(function() {
-      var table = $("#CONCORDANCE").DataTable({
-	  order: [[ 1, "asc" ]],
-	  lengthMenu: [
-              [10, 25, 50, 100, -1],
-              [10, 25, 50, 100, "All"]
-	  ],
-	  searchHighlight: true,
-	  destroy: true,
-	  dom: "Bfrtip",
-      buttons: ["copy", "csv", "excel", "pdf", "print"],
-	  columns: [
-              { title: "N°" },
-              { title: "Partie" },
-              { title: "Contexte Gauche" },
-              { title: "Pôle" },
-              { title: "Contexte Droit" }
-	  ],
-      "search": {
-            "regex": true
-        }
-      });
-      if (PARTIE_DEFAULT != "") {
-		table.column(1).search(PARTIE_DEFAULT, true, false).draw();
-      }
-      /*var filteredData = table
-	  .column( 1 )
-	  .data()
-	  .filter( function ( value, index ) {
-              return (value == PARTIE_DEFAULT) ? true : false;
-	  } );*/
-  });
-    
+    table += "</table></div>";
+    //$("#placeholder").html("");
+    //$("#placeholder").html(table);
+    //$("#placeholder").append(table);
+    document.getElementById("placeholder").innerHTML +=table;
+    var column_test;
+    if (localStorage.getItem("language") == "fr"){
+      column_test = [
+		{ title: "N°" },
+		{ title: "Partie" },
+		{ title: "Contexte Gauche" },
+		{ title: "Pôle" },
+		{ title: "Contexte Droit" }
+	    ]
+    } 
+    else {
+      column_test = [
+		{ title: "N°" },
+		{ title: "Part" },
+		{ title: "Left Context" },
+		{ title: "Pole" },
+		{ title: "Right Context" }
+	    ]
+    }
+    $(document).ready(function() {
+	var tableConc=$("#CONCORDANCE").DataTable({
+	    order: [[ 1, "asc" ]],
+	    lengthMenu: [
+		[10, 25, 50, 100, -1],
+		[10, 25, 50, 100, "All"]
+	    ],
+	    searchHighlight: true,
+	    destroy: true,
+	    //dom: "Bfrtip",
+	    //buttons: ["copy", "csv", "excel", "pdf", "print"],
+	    columns: column_test,
+	    "search": { // ne fonctionne pas....
+		"regex": true
+            }
+	});
+	if (PARTIE_DEFAULT != "") {
+	    tableConc.column(1).search(PARTIE_DEFAULT, true, false).draw();
+	}
+    });    
 }
+
+function playAudioNaija(audiofile) {
+	
+    //console.log("reading:"+audiofile);
+	var para=audiofile.split("#t=");
+	//console.log(para);
+	var time=para[1];
+	var startL=time.split(",");
+	var start=Number(startL[0]);
+    var audioFileOK="http://www.tal.univ-paris3.fr/trameur/iTrameur-naija/mp3/"+para[0]; 
+	// variable à changer pour localiser les mp3
+    console.log("reading:"+audioFileOK);
+	document.getElementById("AudioNaija").innerHTML ='<audio id="passage-audio" preload="auto" class="passage" controls ><source src="'+audioFileOK+'" type="audio/mp3" id="passage-audio-src"/><em class="error"><strong>Error:</strong> Your browser doesn\'t appear to support HTML5 Audio.</em></audio><br/><div class="track-details">'+audiofile+'</div>';
+	myAudio=document.getElementById('passage-audio');
+	myAudio.addEventListener('canplaythrough', function() {
+		var is_playing = this.paused;
+		if (is_playing) {
+			this.pause();
+			this.currentTime = start;
+			//console.log("debut :"+start);
+			//this.play();
+		}
+		
+	});
+	
+}
+
 //-----------------------------------------------------------------------------------------
 function specifsTotalesParties(partition) {
+	
+	refreshItrameur();
 	var PARTITION = partition;
     var DictionnaireDesItems = new Object();
     var DictionnaireNumDesItems = new Object();
@@ -1765,8 +1904,8 @@ for (var mot in DictionnaireDesItems) {
 
   document.getElementById("placeholder").style.height = "auto";
   document.getElementById("placeholder").innerHTML =
-    "<h4>Tableau Général des Items (PARTITION : "+PARTITION +
-    ')</h4><br/><small><b><span style="background: #4de14b ">Clic sur un mot</span></b> : concordance du mot visé.</small><br/><br/><table id="specifsTotalesParties" class="display" width="100%"></table>';
+    "<h4><span id='tableau'>Tableau Général des Items (PARTITION : </span>"+PARTITION +
+    ')</h4><br/><small><b><span id="tip_clic" style="background: #4de14b ">Clic sur un mot</span></b><span id="tip_clic_suivant"> : concordance du mot visé.</span></small><br/><br/><table id="specifsTotalesParties" class="display" width="100%"></table>';
   // <small>(FQ &gt; " +
   // 5 +
   // " | annotation:" +
@@ -1838,15 +1977,16 @@ function specifsPartie(partition,partie) {
     FQpartie[PARTIE]=0;
     var listepositions = cadre[PARTITION][PARTIE];
  
-    sendIdSelectNumber=(listepositions.length)/2;
-    console.log("send_id sélectionnées : "+sendIdSelectNumber+" sur "+sendIdNumber+" au total");
 
-    if ((listepositions === undefined) || (sendIdSelectNumber ==0)) {
+    if ((listepositions === undefined )) { //|| (sendIdSelectNumber ==0)) {
 		
-		var vide="<small>(send_id sélectionnés : "+sendIdSelectNumber+" sur "+sendIdNumber+")</small><br/>... partie vide ....";
+		var vide="<small><span id='alert41'>(send_id sélectionnés : </span>"+sendIdSelectNumber+"<span id='alert42'> sur </span>"+sendIdNumber+")</small><br/><span id='alert43'>... partie vide ....</span>";
 		$("#placeholder").html(vide);
 		return
     }
+
+    sendIdSelectNumber=(listepositions.length)/2;
+    console.log("send_id sélectionnées : "+sendIdSelectNumber+" sur "+sendIdNumber+" au total");
 
 
     for (var k=0;k<(listepositions.length);k=k+2) {
@@ -1961,28 +2101,29 @@ function specifsPartie(partition,partie) {
 	}	
 	//console.log(tagcloud);
 	if (document.getElementById('expertID').checked) {
-		var tmpInfoSend="<small>(send_id sélectionnés : "+sendIdSelectNumber+" sur "+sendIdNumber+")</small>";
-		document.getElementById('placeholder').innerHTML = '<h4>Spécificités Partie : '+PARTIE+' (Partition : '+PARTITION+')</h4>'+tmpInfoSend+'<br/><small><b><span style="background: #4de14b">Clic sur un mot</span></b> : concordance du mot visé.</small><br/><br/><table id="SpecifPartie" class="display" width="50%"></table>';
+		//<small>(send_id sélectionnés : "+sendIdSelectNumber+" sur "+sendIdNumber+")</small>";
+		var tmpInfoSend="<small><span id='alert41'>(send_id sélectionnés : </span>"+sendIdSelectNumber+"<span id='alert42'> sur </span>"+sendIdNumber+")</small>";		
+		document.getElementById('placeholder').innerHTML = '<h4><span id="specifPartie">Spécificités Partie : </span>'+PARTIE+' (Partition : '+PARTITION+')</h4>'+tmpInfoSend+'<br/><small><b><span id="tip_clic" style="background: #4de14b">Clic sur un mot</span></b><span id="tip_clic_suivant"> : concordance du mot visé.</span></small><br/><br/><table id="SpecifPartie" class="display" width="50%"></table>';
 		$(document).ready(function() {
 		$('#SpecifPartie').DataTable ( {
-	    order: [[ 3, "desc" ]],
-	    searchHighlight: true,
-	    "destroy": true,
-	    lengthMenu: [[10, 25, 50,100, -1], [10, 25, 50,100, "All"]],
-	    data:resultFinal,
-		dom: 'Bfrtip',
-		buttons: [
-				'copy', 'csv', 'excel', 'pdf', 'print'
-			],
-	    columns: [
-		{title: "Item"},
-		{title: "FQ"},
-		{title: "fq"},
-		{title: "Sp"}
-	    ],
-        "search": {
-            "regex": true
-        }
+		    order: [[ 3, "desc" ]],
+		    searchHighlight: true,
+		    "destroy": true,
+		    lengthMenu: [[10, 25, 50,100, -1], [10, 25, 50,100, "All"]],
+		    data:resultFinal,
+		    dom: 'Bfrtip',
+		    buttons: [
+			'copy', 'csv', 'excel', 'pdf', 'print'
+		    ],
+		    columns: [
+			{title: "Item"},
+			{title: "FQ"},
+			{title: "fq"},
+			{title: "Sp"}
+		    ],
+		    "search": {
+			"regex": true
+		    }
 		})
 		});
 	
@@ -1994,7 +2135,7 @@ function specifsPartie(partition,partie) {
 	}
 	else {
 		
-		var tmpInfoSend='<h4>Les mots spécifiques de la partie : '+PARTIE+' (Partition : '+PARTITION+')</h4><small><b><span style="background: #4de14b">Clic sur un mot</span></b> : concordance du mot visé.</small><br/>';
+		var tmpInfoSend='<h4><span id="specifMot">Les mots spécifiques de la partie : </span>'+PARTIE+' (Partition : '+PARTITION+')</h4><small><b><span id="tip_clic" style="background: #4de14b">Clic sur un mot</span></b><span id="tip_clic_suivant"> : concordance du mot visé.</span></small><br/>';
 		document.getElementById('placeholder').innerHTML = tmpInfoSend;
   		document.getElementById('placeholder').innerHTML += "<div id='wordCloud'></div>";
 		document.getElementById('wordCloud').style.width = "600px";
@@ -2021,6 +2162,7 @@ function specifsPartie(partition,partie) {
 				//alert("You have selected:" +$(this).text());
 				document.getElementById("poleID").value=$(this).text();
 				concordance();
+				//getLanguage();
 			},		              
 			beforeCloudRender: function(){
 		       date1=new Date();
@@ -2033,3 +2175,1740 @@ function specifsPartie(partition,partie) {
 	}
 }
 //-----------------------------------------------------------------------------------
+/*---------------------------------------------------------------------------------------------------------------------------------------*/
+function calculCoocNgram() {
+
+    
+	refreshItrameur();
+
+	var lgcontexte = document.getElementById("lgcontexteID").value;
+    if (lgcontexte == "") {
+		document.getElementById("lgcontexteID").value = 10;
+		lgcontexte=10;
+    }
+	
+    var DictionnaireDesItems = new Object();
+    var DictionnaireNumDesItems = new Object();
+    if (annotationencours==1) {
+	DictionnaireDesItems = jQuery.extend({}, DictionnaireSource);
+	DictionnaireNumDesItems=jQuery.extend({}, dicNum2forme);
+    }
+    if (annotationencours==2) {
+	DictionnaireDesItems = jQuery.extend({}, DictionnaireLemme);
+	DictionnaireNumDesItems=jQuery.extend({}, dicNum2lemme);
+    }
+    if (annotationencours==3) {
+	DictionnaireDesItems = jQuery.extend({}, DictionnaireCategorie);
+	DictionnaireNumDesItems=jQuery.extend({}, dicNum2categorie);
+    }
+    if (annotationencours>3) {
+	DictionnaireDesItems = jQuery.extend({}, DictionnaireAnnotation);
+	DictionnaireNumDesItems=jQuery.extend({}, dicNum2annotation);
+    }
+    var annotationencoursIndex=annotationencours-1;
+    var queryText=document.getElementById('poleID').value;
+    if (queryText == ''){
+	//var vide='<small><span style="text-align:center; border: 1pt dotted #939393 ; padding: 1pt; margin-left: 0px; margin-right: 0px; background:red">Entrez un pôle pour pouvoir lancer le calcul...</span></small>';
+	var vide ='<small><span id="alert3" style="text-align:center; border: 1pt dotted #939393 ; padding: 1pt; margin-left: 0px; margin-right: 0px; background:red">Entrez un pôle pour pouvoir lancer le calcul...</span></small>';
+	$("#placeholder").html(vide);
+        return;
+    }
+    if (annotationencours<=3) {
+	if (!(queryText in DictionnaireDesItems) ) {
+	    var vide='<small><span style="text-align:center; border: 1pt dotted #939393 ; padding: 1pt; margin-left: 0px; margin-right: 0px; background:red">Le pôle choisi n\'est pas dans le dictionnaire...</span></small>';
+	    $("#placeholder").html(vide);
+	    return;	
+	}
+    }
+    else {
+	var tmpannot=annotationencours+"//"+queryText;
+	if (!(tmpannot in DictionnaireDesItems) ) {
+	    var vide='<small><span style="text-align:center; border: 1pt dotted #939393 ; padding: 1pt; margin-left: 0px; margin-right: 0px; background:red">Le pôle choisi n\'est pas dans le dictionnaire...</span></small>';
+	    $("#placeholder").html(vide);
+	    return;	
+	}		
+    }
+
+    var indspmin=5;
+    var cofreq=2;
+    var nbGramGauche=lgcontexte;
+    var nbGramDroite=lgcontexte;
+	document.getElementById('placeholder2').style.height = "0px";
+    GrapheArborL=800;
+    GrapheArborH=400;	
+
+    reinit_canvas();
+    var vide='<small><span style="text-align:center; border: 1pt dotted #939393 ; padding: 1pt; margin-left: 0px; margin-right: 0px; background:#FDBBD2">Calcul en cours</span></small>';
+    $("#placeholder").html(vide);
+    var COFREQ = new Object(); 
+    var resultsMatch=0;
+    var CONTEXTES='';
+    var nbContexte=0;
+    LISTESCONTEXTESCOOC= new Object(); 
+    var DICOPARPARTIE = new Object(); 
+    var FQpartie=0;
+    /* parcours de la Trame et calcul des fqs de la partie */
+    var trameCoocContexte=new Object(); 
+    for (var index in trameForme) {
+	if (!(dicNum2forme[trameForme[index][0]] in dictionnairedesdelims)) {
+	    var item=DictionnaireNumDesItems[trameForme[index][annotationencoursIndex]];
+	    if (item == queryText) {
+		nbContexte++;
+		var contexte="";
+		var j=Number(index);
+		var tmpg=j;
+		var tmpd=j;		
+		for (var i=1;i<=nbGramGauche;i++) {
+		    if ((j-i) > 0) {
+			tmpg=j-i;
+			var itemcooc=DictionnaireNumDesItems[trameForme[j-i][annotationencoursIndex]];
+			if ((itemcooc != " ") && (itemcooc != "")) {
+			    FQpartie=FQpartie+1;
+			}
+			/*----------------------*/
+			/*filtrage stop liste  */
+			//var inputStopListe = document.getElementById ("stoplistecoocngramID");
+			//var isCheckedStopListe = inputStopListe.checked;
+			var filtrestopliste=0;
+			//if (isCheckedStopListe) {
+			//    if (gestionnaireSelection[j-i]==1) {
+			//	filtrestopliste =1
+			//    }
+			//}
+			/*----------------------*/
+			if (filtrestopliste==0) {
+			    trameCoocContexte[j-i]=1;
+			    if (!(dicNum2forme[trameForme[j-i][0]] in dictionnairedesdelims))  {
+				contexte = itemcooc + contexte;
+				if (COFREQ[queryText] === undefined) {
+				    COFREQ[queryText]=new Object();
+				    COFREQ[queryText][itemcooc]=1;
+				}
+				else {
+				    if (!COFREQ[queryText].hasOwnProperty(itemcooc)) {
+					COFREQ[queryText][itemcooc]=1;
+				    }
+				    else {
+					COFREQ[queryText][itemcooc]=COFREQ[queryText][itemcooc]+1;
+				    }
+				}
+				if ((itemcooc != " ") && (itemcooc != "")) {
+				    if (DICOPARPARTIE[itemcooc] === undefined) {
+					DICOPARPARTIE[itemcooc] = 1;
+				    }
+				    else {
+					DICOPARPARTIE[itemcooc] = DICOPARPARTIE[itemcooc]  + 1;
+				    }
+				}
+			    }
+			    else {
+				contexte = dicNum2forme[trameForme[j-i][0]] + contexte;
+			    }
+			}
+		    }
+		}
+		contexte = contexte + item;
+		for (var i=1;i<=nbGramDroite;i++) {
+		    if ((j+i) < positionsurlatrame) {
+			tmpd=j+i;
+			var itemcooc=DictionnaireNumDesItems[trameForme[j+i][annotationencoursIndex]];
+			if ((itemcooc != " ") && (itemcooc != "")) {
+			    FQpartie=FQpartie+1;
+			}
+			/*----------------------*/
+			/*filtrage stop liste  */
+			//var inputStopListe = document.getElementById ("stoplistecoocngramID");
+			//var isCheckedStopListe = inputStopListe.checked;
+			var filtrestopliste=0;
+			//if (isCheckedStopListe) {
+			//    if (gestionnaireSelection[j-i]==1) {
+			//	filtrestopliste =1
+			//    }
+			//}
+			/*----------------------*/
+			if (filtrestopliste==0) {
+			    trameCoocContexte[j+i]=1;
+			    if (!(dicNum2forme[trameForme[j+i][0]] in dictionnairedesdelims))  {
+				contexte = contexte + itemcooc ;
+				if (COFREQ[queryText] === undefined) {
+				    COFREQ[queryText]=new Object();
+				    COFREQ[queryText][itemcooc]=1;
+				}
+				else {
+				    if (!COFREQ[queryText].hasOwnProperty(itemcooc)) {
+					COFREQ[queryText][itemcooc]=1;
+				    }
+				    else {
+					COFREQ[queryText][itemcooc]=COFREQ[queryText][itemcooc]+1;
+				    }
+				}
+				if ((itemcooc != " ") && (itemcooc != "")) {
+				    if (DICOPARPARTIE[itemcooc] === undefined) {
+					DICOPARPARTIE[itemcooc] = 1;
+				    }
+				    else {
+					DICOPARPARTIE[itemcooc] = DICOPARPARTIE[itemcooc]  + 1;
+				    }
+				}
+			    }
+			    else {
+				contexte = contexte + dicNum2forme[trameForme[j+i][0]] ;
+			    }
+			}
+		    }
+		}
+		LISTESCONTEXTESCOOC[nbContexte]=tmpg+":"+tmpd;
+	    }
+	}
+    }
+    /*calcul cooc */
+    DICOTFG = new Object();	
+    var NBcooc=0;
+    /*-------- calcul specif-----------------------------------------------*/
+    for (var mot in DICOPARPARTIE) {
+	if (mot != queryText) {
+	    if ((COFREQ[queryText][mot] >= cofreq)) {
+		var Tsource = NBMOTTOTALSource;
+		var tsource = FQpartie ;
+		//alert(Tsource+"|"+tsource+"|"+DictionnaireDesItems[mot]+"|"+DICOPARPARTIE[mot]);
+		var result;
+		if (annotationencours>3) {
+		    var tmpannot=annotationencours+"//"+mot;
+		    result = CalcCoeffSpec(Tsource,tsource,DictionnaireDesItems[tmpannot],DICOPARPARTIE[mot],seuil); 
+		}
+		else {
+		    result = CalcCoeffSpec(Tsource,tsource,DictionnaireDesItems[mot],DICOPARPARTIE[mot],seuil); 
+		}
+		result=precise_round(result,0);
+		if (result==Infinity) {result=9e15}
+		if (result==-Infinity) {result=-9e15}
+
+		if ((result >= indspmin)) {
+		    if (annotationencours>3) {
+			var tmpannot=annotationencours+"//"+mot;
+			var TMP = [DictionnaireDesItems[tmpannot],COFREQ[queryText][mot] ,result];
+			DICOTFG[mot]=TMP;
+			NBcooc+=1;
+		    }
+		    else {
+			var TMP = [DictionnaireDesItems[mot],COFREQ[queryText][mot] ,result];
+			DICOTFG[mot]=TMP;
+			NBcooc+=1;
+		    }
+		}
+	    }
+	}
+    }
+    /*Affichage resultats */
+    var LISTEMOTSTFG= Object.keys(DICOTFG).sort(function(a,b){
+	var x = DICOTFG[a][2];
+	var y = DICOTFG[b][2];
+	return x < y ? 1 : x > y ? -1 : 0;
+    });
+    var LISTCOOC = [];
+    var LISTVALUECOOC = [];
+    for (var key in LISTEMOTSTFG) {
+        LISTCOOC.push(LISTEMOTSTFG[key]);
+	LISTVALUECOOC.push(DICOTFG[LISTEMOTSTFG[key]]);
+    }
+	var table='';
+	if (localStorage.getItem("language") == "fr"){
+		table='<p align="center"><span style=\"font-size:0.7em\" id=\"tip_clic2\">(clic sur mot : contextes)</span></p>';
+	}
+	else {
+		table='<p align="center"><span style=\"font-size:0.7em\" id=\"tip_clic2\">(Click on a word : contexts)</span></p>';
+	}
+	
+    table += '<table align="center" class="myTable">';
+    table += '<tr>';
+    table +='    <th width="40%">Cooc</th>';
+    table +='    <th width="20%">FqCooc</th>';
+    table +='    <th width="20%">CoFreq</th>';
+    table +='    <th width="20%">IndSP</th>';
+    table += '</tr>';
+    for (var i=0; i<LISTCOOC.length;i++)   {
+	var tmp=DICOTFG[LISTCOOC[i]].toString();
+	var values = tmp.split(',');
+	var result=values[2];
+	var colornode="#fee7cd";
+	if (result >= 50) {colornode="#ff0000";result="**" } 
+	if ((result >= 30) && (result < 50  ) ) {colornode="#ff5555" } 
+	if ((result >= 20) && (result < 30  ) ) {colornode="#ff8484" } 
+	if ((result >= 10) && (result < 20  ) ) {colornode="#f3838b" } 
+	if ((result >= 5) && (result < 10  ) ) {colornode="#ffb0b0" } 
+	if ((result >= 0) && (result < 5  ) ) {colornode="#fee7cd" } 
+//	if (values[2] >= 50) { result = Infinity};
+        table +='<tr><td><span style="background-color:'+ colornode +'"><a href="javascript:onclickWord(\''+LISTCOOC[i]+'\')">'+LISTCOOC[i]+'</a></span></td><td>'+values[0]+'</td><td>'+values[1]+'</td><td><b><font color="red">'+result+'</font></b></td></tr>';
+    }
+    table +='</table>';
+ 	
+	if (localStorage.getItem("language") == "fr"){
+		table += '<p align="center"><span style=\"font-size:0.7em\" id=\"tip_clic3\">(clic sur mot : contextes)</span></p>';
+	}
+	else {
+		table += '<p align="center"><span style=\"font-size:0.7em\" id=\"tip_clic3\">(Click on a word : contexts)</span></p>';
+	}
+
+	
+    table += '<p>&nbsp;</p>';
+    table += '<p>&nbsp;</p>';
+    if (NBcooc > 0 ) {
+	document.getElementById('placeholder2').style.height = "200px";
+	$("#placeholder2").html(table);
+    }
+    /*-----------------------GRAPHE-----------------------------------------------------------------------*/
+    if (NBcooc > 0 ) {	
+		document.getElementById('legendGraphe').innerHTML = "";
+		var legend ='';
+		if (localStorage.getItem("language") == "fr"){
+			legend ='<small><b><span id="tip_cooc1">Couleur Noeud-Cooc</span></b> : <span style="background-color:#fee7cd;color:black">IndicSp</span>&lt;<b>5</b>&lt;<span style="background-color:#ffb0b0;color:black">IndicSp</span>&lt;<b>10</b>&lt;<span style="background-color:#ff3838b;color:black">IndicSp</span>&lt;<b>20</b>&lt;<span style="background-color:#ff8484;color:black">IndicSp</span>&lt;<b>30</b>&lt;<span style="background-color:#ff5555;color:black">IndicSp</span>&lt;<b>50</b>&lt;<span style="background-color:#ff0000;color:black">IndicSp</span><br/><b><span id="tip_cooc2">Arc Label</span></b> : <b>POLE</b><font color="#99CC99">&#x2212;</font>IndSp(Co-Freq)<font color="#99CC99">&#8594;</font><b>COOC</b></small><br/><span style="background:yellow"><img onclick="clear_canvas();" src="./images/trash.png" title="suppression graphique" alt="suppression graphique"/></span>';
+		}
+		else {
+			legend ='<small><b><span id="tip_cooc1">Node-Cooc Color</span></b> : <span style="background-color:#fee7cd;color:black">IndicSp</span>&lt;<b>5</b>&lt;<span style="background-color:#ffb0b0;color:black">IndicSp</span>&lt;<b>10</b>&lt;<span style="background-color:#ff3838b;color:black">IndicSp</span>&lt;<b>20</b>&lt;<span style="background-color:#ff8484;color:black">IndicSp</span>&lt;<b>30</b>&lt;<span style="background-color:#ff5555;color:black">IndicSp</span>&lt;<b>50</b>&lt;<span style="background-color:#ff0000;color:black">IndicSp</span><br/><b><span id="tip_cooc2">Arrow Label</span></b> : <b>POLE</b><font color="#99CC99">&#x2212;</font>IndSp(Co-Freq)<font color="#99CC99">&#8594;</font><b>COOC</b></small><br/><span style="background:yellow"><img onclick="clear_canvas();" src="./images/trash.png" title="delete" alt="delete"/></span>';
+
+			
+		}
+	
+	
+	document.getElementById('legendGraphe').innerHTML = legend;
+	/*----*/
+	sysArbor =  new arbor.ParticleSystem(20, 600, 0.8, false, 50, 0.015, 0.6);
+	//var sys = new arbor.ParticleSystem(30, 800,1,true);
+	/*sys.parameters({ stiffness: 800,
+			 repulsion: 200,
+			 gravity: true,
+			 dt:0.015,
+			 friction: 0.8});*/
+	var pole = sysArbor.addNode('POLE',{'color':'red','shape':'dot','label':queryText});
+	LISTEDESNOEUDSINCANVAS.push(pole);
+	var nodeMot;
+	var cpmot=1;
+	for (var mot in DICOTFG) {
+	    var nodename=mot;
+	    cpmot++;			
+	    var tmp=DICOTFG[mot].toString();
+	    var values = tmp.split(',');
+	    var result=values[2];
+	    /* parametrage des noeuds */
+	    var colornode="#fee7cd";
+	    if (result >= 50) {colornode="#ff0000" } 
+	    if ((result >= 30) && (result < 50  ) ) {colornode="#ff5555" } 
+	    if ((result >= 20) && (result < 30  ) ) {colornode="#ff8484" } 
+	    if ((result >= 10) && (result < 20  ) ) {colornode="#f3838b" } 
+	    if ((result >= 5) && (result < 10  ) ) {colornode="#ffb0b0" } 
+	    if ((result >= 0) && (result < 5  ) ) {colornode="#fee7cd" } 
+	    nodeMot =sysArbor.addNode(nodename,{'color':colornode,'shape':'rectangle','label':mot});
+		LISTEDESNOEUDSINCANVAS.push(nodeMot);		
+	    /* parametrage de l'edge */
+//	    if (values[2] >= 50) { result = Infinity};
+	    if (result >= 50) {result="**" } ;
+	    var label = result + ' ('+ values[1] +') ';
+	    sysArbor.addEdge(pole, nodeMot,{'weight':5,'color':'#99CC99','directed':1,'length':.75, 'pointSize':10,data:{name:label}});
+	}
+	sysArbor.renderer = Renderer("#grapheHolder");
+	/*sys.graft(theUI) ;*/
+    }
+    else {
+	var canvas = document.getElementById('grapheHolder');
+	var ctx = canvas.getContext('2d');
+	GrapheArborL=800;
+	GrapheArborH=100;	
+	reinit_canvas();
+	ctx.font="40px Georgia";
+	ctx.fillText("Pas de cooccurrents, pas de graphe !! ",40,50);
+	ctx.font="20px Georgia";
+	ctx.fillText("Modifiez les paramètres de calcul ",60,90);
+    }
+    /*---------------------GRAPHE-------------------------------------------------------------------------*/
+    document.getElementById('placeholder').innerHTML = '';	
+}
+
+//--------------------------------------------------------------------------------------
+function refreshItrameur() {
+    var vide="";
+    $("#graph-analysis1").html(vide);
+    $("#graph-analysis2").html(vide);
+    $("#graph-analysis3").html(vide);
+    $("#legend-graph-analysis1").html(vide);
+    $("#legend-graph-analysis2").html(vide);
+    $("#legend-graph-analysis3").html(vide);
+    $("#contextehtml").html(vide);
+    $("#page-analysis").html(vide);
+    $("#placeholder").html(vide);
+    $("#placeholder2").html(vide);
+    $("#page-analysis").html(vide);
+    $("#legendGraphe").html(vide);
+    isTheCarteDesSectionsOK=0;
+    document.getElementById('placeholder2').style.height = "0px";
+    GrapheArborL=0;
+    GrapheArborH=0;	
+    reinit_canvas();	
+}
+//--------------------------------------------------------------------------------------
+function reinit_canvas() {
+    /* PB */
+    for (var nodeoredge=0;nodeoredge<LISTEDESNOEUDSINCANVAS.length;nodeoredge++) {
+	sysArbor.pruneNode(LISTEDESNOEUDSINCANVAS[nodeoredge]);
+    }
+    /*------*/
+    LISTEDESNOEUDSINCANVAS=[];
+    delete sysArbor;
+    var canvas = document.getElementById('grapheHolder');
+    var gfx = arbor.Graphics(canvas)
+    gfx.clear();
+    while (canvas.hasChildNodes()) {
+	canvas.removeChild(canvas.lastChild);
+    } 
+    delete sysArbor;
+    $('#grapheHolder').remove();
+    $('#contentgrapheholder').append('<canvas id="grapheHolder"></canvas>');
+    canvas = document.getElementById('grapheHolder');
+    var context = canvas.getContext('2d');
+    var gfx = arbor.Graphics(canvas)
+    gfx.clear();
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    canvas.width = 800;
+    canvas.height = 600;
+    document.getElementById('grapheHolder').innerHTML='';
+}
+/*---------------------------------------------------------------------------*/
+function clear_canvas() {
+    /* PB */
+    for (var nodeoredge=0;nodeoredge<LISTEDESNOEUDSINCANVAS.length;nodeoredge++) {
+	sysArbor.pruneNode(LISTEDESNOEUDSINCANVAS[nodeoredge]);
+    }
+    /*------*/
+    LISTEDESNOEUDSINCANVAS=[];
+    var canvas = document.getElementById('grapheHolder');
+    var gfx = arbor.Graphics(canvas)
+    gfx.clear();
+    while (canvas.hasChildNodes()) {
+	canvas.removeChild(canvas.lastChild);
+    } 
+    delete sysArbor;
+    $('#grapheHolder').remove();
+    $('#contentgrapheholder').append('<canvas id="grapheHolder"></canvas>');
+    //context.clearRect(0, 0, canvas.width, canvas.height);
+    //canvas.width = GrapheArborL;
+    //canvas.height = GrapheArborH;
+    //document.getElementById('grapheHolder').innerHTML='';
+    canvas = document.getElementById('grapheHolder');
+    var context = canvas.getContext('2d');
+    context.clearRect(0, 0, canvas.width, canvas.height);
+    canvas.width = GrapheArborL;
+    canvas.height=GrapheArborH;
+    document.getElementById('grapheHolder').innerHTML = '';
+}
+//-----------------------------------------------------------------------------------
+function onclickWord( word ) {
+    document.getElementById('contextehtml').innerHTML = "";
+    var queryText=document.getElementById('poleID').value;
+    //var texte2insert = '<div id="contextehtml2" style="border: 2pt solid #00628B ; padding: 4pt; margin-left: 50px; margin-right: 50px;">';
+    var DictionnaireDesItems = new Object();
+    var DictionnaireNumDesItems = new Object();
+    var DictionnaireDesItemsOut = new Object();
+    var DictionnaireNumDesItemsOut = new Object();
+    if (annotationencours==1) {
+	DictionnaireDesItems = jQuery.extend({}, DictionnaireSource);
+	DictionnaireNumDesItems=jQuery.extend({}, dicNum2forme);
+	if (annotationencours != annotationencoursOUT) {
+	    if (annotationencoursOUT==2) {
+		DictionnaireDesItemsOut = jQuery.extend({}, DictionnaireLemme);
+		DictionnaireNumDesItemsOut=jQuery.extend({}, dicNum2lemme);
+	    }
+	    if (annotationencoursOUT==3) {
+		DictionnaireDesItemsOut = jQuery.extend({}, DictionnaireCategorie);
+		DictionnaireNumDesItemsOut=jQuery.extend({}, dicNum2categorie);
+	    }
+	    if (annotationencoursOUT>3) {
+		DictionnaireDesItemsOut = jQuery.extend({}, DictionnaireAnnotation);
+		DictionnaireNumDesItemsOut=jQuery.extend({}, dicNum2annotation);
+	    }
+	}
+	else {
+	    DictionnaireDesItemsOut = jQuery.extend({}, DictionnaireSource);
+	    DictionnaireNumDesItemsOut=jQuery.extend({}, dicNum2forme);
+	}
+    }
+    if (annotationencours==2) {
+	DictionnaireDesItems = jQuery.extend({}, DictionnaireLemme);
+	DictionnaireNumDesItems=jQuery.extend({}, dicNum2lemme);
+	if (annotationencours != annotationencoursOUT) {
+	    if (annotationencoursOUT==1) {
+		DictionnaireDesItemsOut = jQuery.extend({}, DictionnaireSource);
+		DictionnaireNumDesItemsOut=jQuery.extend({}, dicNum2forme);
+	    }
+	    if (annotationencoursOUT==3) {
+		DictionnaireDesItemsOut = jQuery.extend({}, DictionnaireCategorie);
+		DictionnaireNumDesItemsOut=jQuery.extend({}, dicNum2categorie);
+	    }
+	    if (annotationencoursOUT>3) {
+		DictionnaireDesItemsOut = jQuery.extend({}, DictionnaireAnnotation);
+		DictionnaireNumDesItemsOut=jQuery.extend({}, dicNum2annotation);
+	    }
+	}
+	else {
+	    DictionnaireDesItemsOut = jQuery.extend({}, DictionnaireLemme);
+	    DictionnaireNumDesItemsOut=jQuery.extend({}, dicNum2lemme);
+	}
+    }
+    if (annotationencours==3) {
+	DictionnaireDesItems = jQuery.extend({}, DictionnaireCategorie);
+	DictionnaireNumDesItems=jQuery.extend({}, dicNum2categorie);
+	if (annotationencours != annotationencoursOUT) {
+	    if (annotationencoursOUT==1) {
+		DictionnaireDesItemsOut = jQuery.extend({}, DictionnaireSource);
+		DictionnaireNumDesItemsOut=jQuery.extend({}, dicNum2forme);
+	    }
+	    if (annotationencoursOUT==2) {
+		DictionnaireDesItemsOut = jQuery.extend({}, DictionnaireLemme);
+		DictionnaireNumDesItemsOut=jQuery.extend({}, dicNum2lemme);
+	    }
+	    if (annotationencoursOUT>3) {
+		DictionnaireDesItemsOut = jQuery.extend({}, DictionnaireAnnotation);
+		DictionnaireNumDesItemsOut=jQuery.extend({}, dicNum2annotation);
+	    }
+	}
+	else {
+	    DictionnaireDesItemsOut = jQuery.extend({}, DictionnaireCategorie);
+	    DictionnaireNumDesItemsOut=jQuery.extend({}, dicNum2categorie);
+	}
+    }
+    if (annotationencours>3) {
+	DictionnaireDesItems = jQuery.extend({}, DictionnaireAnnotation);
+	DictionnaireNumDesItems=jQuery.extend({}, dicNum2annotation);
+	if (annotationencours != annotationencoursOUT) {
+	    if (annotationencoursOUT==1) {
+		DictionnaireDesItemsOut = jQuery.extend({}, DictionnaireSource);
+		DictionnaireNumDesItemsOut=jQuery.extend({}, dicNum2forme);
+	    }
+	    if (annotationencoursOUT==2) {
+		DictionnaireDesItemsOut = jQuery.extend({}, DictionnaireLemme);
+		DictionnaireNumDesItemsOut=jQuery.extend({}, dicNum2lemme);
+	    }
+	    if (annotationencoursOUT==3) {
+		DictionnaireDesItemsOut = jQuery.extend({}, DictionnaireCategorie);
+		DictionnaireNumDesItemsOut=jQuery.extend({}, dicNum2categorie);
+	    }
+	    if (annotationencoursOUT>3) {
+		DictionnaireDesItemsOut = jQuery.extend({}, DictionnaireAnnotation);
+		DictionnaireNumDesItemsOut=jQuery.extend({}, dicNum2annotation);
+	    }
+	}
+	else {
+	    DictionnaireDesItemsOut = jQuery.extend({}, DictionnaireAnnotation);
+	    DictionnaireNumDesItemsOut=jQuery.extend({}, dicNum2annotation);
+	}
+    }
+    var annotationencoursIndex=annotationencours-1;
+    var annotationencoursIndexOUT=annotationencoursOUT-1;
+    var nbContexte=0;
+    var resultFinal=new Array();
+    for (var contexte in LISTESCONTEXTESCOOC) {
+	var infoSource =  LISTESCONTEXTESCOOC[contexte].split(":");
+	var posDebS=Number(infoSource[0]);
+	var posFinS=Number(infoSource[1]);
+	var contentxt =  "";
+	var verifWord=0;
+	for (var i=posDebS;i<=posFinS;i++) {
+	    var item=DictionnaireNumDesItems[trameForme[i][annotationencoursIndex]];
+	    var item2=DictionnaireNumDesItemsOut[trameForme[i][annotationencoursIndexOUT]];
+	    if (!(dicNum2forme[trameForme[i][0]] in dictionnairedesdelims)) {
+		//-----------------------------------------------------------
+		var colornode="#FFFFFF0";
+		if (DICOTFG.hasOwnProperty(item)) {
+		    var tmp=DICOTFG[item].toString();
+		    var values = tmp.split(',');
+		    var result=values[2];
+		    if (result >= 50) {colornode="#ff0000" } 
+		    if ((result >= 30) && (result < 50  ) ) {colornode="#ff5555" } 
+		    if ((result >= 20) && (result < 30  ) ) {colornode="#ff8484" } 
+		    if ((result >= 10) && (result < 20  ) ) {colornode="#f3838b" } 
+		    if ((result >= 5) && (result < 10  ) ) {colornode="#ffb0b0" } 
+		    if ((result >= 0) && (result < 5  ) ) {colornode="#fee7cd" } 
+		}
+		if (item == queryText) {colornode="#ff0000"}
+		//------------------------------------------------------------
+		if (item == word) {
+		    verifWord++;		    
+		    if (nombredannotation > 1) {
+			if (nombredannotation > 3) {
+			    contentxt+="<a style=\"text-decoration:none\" href=\"#\" onmouseover=\"Tip('<p>Position : "+i+"<br/>(1):"+ dicNum2forme[trameForme[i][0]] + "<br/>(2):"+ dicNum2lemme[trameForme[i][1]] +"<br/>(3):"+ dicNum2categorie[trameForme[i][2]];
+			    for (var tmpAnnot=3;tmpAnnot<nombredannotation;tmpAnnot++) {
+				var kk=tmpAnnot+1;
+				contentxt+="<br/>("+ kk +"):"+ dicNum2annotation[trameForme[i][tmpAnnot]];
+			    }
+			    contentxt+="</p>')\" onmouseout=\"UnTip()\" rel=\""+i+"\"><span style=\"background:"+colornode+"\">"+item2+"</span></a>";
+			}
+			else {
+			    contentxt+="<a style=\"text-decoration:none\" href=\"#\" onmouseover=\"Tip('<p>Position : "+i+"<br/>(1):"+ dicNum2forme[trameForme[i][0]] + "<br/>(2):"+ dicNum2lemme[trameForme[i][1]] +"<br/>(3):"+ dicNum2categorie[trameForme[i][2]]+"</p>')\" onmouseout=\"UnTip()\" rel=\""+item+"\"><span style=\"background:"+colornode+"\">"+item2+"</span></a>";
+			}
+		    }
+		    else {
+			contentxt+="<span style=\"background:"+colornode+"\">"+item2+"</span>";
+		    }	
+		}
+		if (item == queryText) {
+		    if (nombredannotation > 1) {
+			if (nombredannotation > 3) {
+			    contentxt+="<a style=\"text-decoration:none\" href=\"#\" onmouseover=\"Tip('<p>Position : "+i+"<br/>(1):"+ dicNum2forme[trameForme[i][0]] + "<br/>(2):"+ dicNum2lemme[trameForme[i][1]] +"<br/>(3):"+ dicNum2categorie[trameForme[i][2]];
+			    for (var tmpAnnot=3;tmpAnnot<nombredannotation;tmpAnnot++) {
+				var kk=tmpAnnot+1;
+				contentxt+="<br/>("+ kk +"):"+ dicNum2annotation[trameForme[i][tmpAnnot]];
+			    }
+			    contentxt+="</p>')\" onmouseout=\"UnTip()\" rel=\""+i+"\"><span style=\"background:"+colornode+"\">"+item2+"</span></a>";
+			}
+			else {
+			    contentxt+="<a style=\"text-decoration:none\" href=\"#\" onmouseover=\"Tip('<p>Position : "+i+"<br/>(1):"+ dicNum2forme[trameForme[i][0]] + "<br/>(2):"+ dicNum2lemme[trameForme[i][1]] +"<br/>(3):"+ dicNum2categorie[trameForme[i][2]]+"</p>')\" onmouseout=\"UnTip()\" rel=\""+item2+"\"><span style=\"background:"+colornode+"\">"+item2+"</span></a>";
+			}
+		    }
+		    else {
+			contentxt+="<span style=\"background:"+colornode+"\">"+item2+"</span></a>";
+		    }
+		}
+		if ((item != word) && (item != queryText)) {
+		    if (nombredannotation > 1) {
+			if (nombredannotation > 3) {
+			    contentxt+="<a style=\"text-decoration:none\" href=\"#\" onmouseover=\"Tip('<p>Position : "+i+"<br/>(1):"+ dicNum2forme[trameForme[i][0]] + "<br/>(2):"+ dicNum2lemme[trameForme[i][1]] +"<br/>(3):"+ dicNum2categorie[trameForme[i][2]];
+			    for (var tmpAnnot=3;tmpAnnot<nombredannotation;tmpAnnot++) {
+				var kk=tmpAnnot+1;
+				contentxt+="<br/>("+ kk +"):"+ dicNum2annotation[trameForme[i][tmpAnnot]];
+			    }
+			    contentxt+="</p>')\" onmouseout=\"UnTip()\" rel=\""+i+"\"><span style=\"background:"+colornode+"\">"+item2+"</span></a>";
+			}
+			else {
+			    contentxt+="<a style=\"text-decoration:none\" href=\"#\" onmouseover=\"Tip('<p>Position : "+i+"<br/>(1):"+ dicNum2forme[trameForme[i][0]] + "<br/>(2):"+ dicNum2lemme[trameForme[i][1]] +"<br/>(3):"+ dicNum2categorie[trameForme[i][2]]+"</p>')\" onmouseout=\"UnTip()\" rel=\""+item2+"\"><span style=\"background:"+colornode+"\">"+item2+"</span></a>";
+			}
+		    }
+		    else {
+			contentxt+="<span style=\"background:"+colornode+"\">"+item2+"</span>";
+		    }
+		}
+	    }
+	    else {
+		contentxt+=item2;
+	    }
+	}
+	if (verifWord >=1) {
+	    resultFinal[nbContexte]=[];
+	    var nbContexteTmp=nbContexte+1;;
+	    resultFinal[nbContexte].push(nbContexteTmp, contentxt);
+	    nbContexte+=1;
+	}
+    }
+	
+	if (localStorage.getItem("language") == "fr"){
+		document.getElementById('contextehtml').innerHTML = '<h4>Contextes</h4><table id="CONTEXTES" class="display" width="70%"></table>';
+	}
+	else {
+		document.getElementById('contextehtml').innerHTML = '<h4>Contexts</h4><table id="CONTEXTES" class="display" width="70%"></table>';
+	}
+	var column_test;
+	if (localStorage.getItem("language") == "fr"){
+      column_test = [
+		{ title: "N°" },
+		{ title: "contexte" }
+	    ]
+    } 
+	else {
+      column_test = [
+		{ title: "N°" },
+		{ title: "context" }
+	    ]
+    }	
+	
+    $(document).ready(function() {
+	$('#CONTEXTES').DataTable ( {
+	    order: [[ 0, "asc" ]],
+	    searchHighlight: true,
+	    "destroy": true,
+	    data:resultFinal,
+	    lengthMenu: [[10, 25, 50,100, -1], [10, 25, 50,100, "All"]],
+	    columns: column_test,
+		"search": { // ne fonctionne pas....
+			"regex": true
+        }
+	})
+    });
+	//getLanguage()
+}
+//-----------------------------------------------------------------------------------
+// FONCTIONS DEPENDANCE
+//-----------------------------------------------------------------------------------
+
+function searchRelationLemmePos() {
+ 
+    //var relation_annot_For_grapherelation=document.getElementById('IDRelation').value;
+    /*if (relation_annot_For_grapherelation==""){
+		var vide='<small><span style="text-align:center; border: 1pt dotted #939393 ; padding: 1pt; margin-left: 0px; margin-right: 0px; background:red">Entrez une valeur numérique pour le numéro d\'annotation visée...</span></small>';
+		$("#placeholder").html(vide);	
+		return;
+    }*/
+    
+    var relation=document.getElementById('IDRelation').value;
+    if (relation == ""){
+		var vide='<small><span style="text-align:center; border: 1pt dotted #939393 ; padding: 1pt; margin-left: 0px; margin-right: 0px; background:red">Entrez une valeur pour le nom de l\'annotation visée...</span></small>';
+		$("#placeholder").html(vide);	
+		return;
+    }
+    //-----------------------------------------------------------------
+    refreshItrameur();
+    //-----------------------------------------------------------------
+    var dicoRelationItems=new Object();
+    dictionnairedespositionsdesrelationsentrelemmes=new Object();
+    dictionnairedesfrequencesdesrelationsentrelemmes=new Object();
+    var lemmeGouv2searchA=document.getElementById("poleID").value;//"";
+	var lemmeGouv2searchB=lemmeGouv2searchA.split("_");
+	var lemmeGouv2search=lemmeGouv2searchB[0];
+	var lemmeGouvPos2search=lemmeGouv2searchB[1];
+	
+	if ((relation == "ANY") && (lemmeGouv2search == "")) {
+		if (localStorage.getItem("language") == "fr"){
+			var vide='<small><span style="text-align:center; border: 1pt dotted #939393 ; padding: 1pt; margin-left: 0px; margin-right: 0px; background:red">Avec la relation ANY, il faut entrer une valeur pour le GOUVERNEUR visé dans la zone Pôle...</span></small>';
+			$("#placeholder").html(vide);	
+		}
+		else {
+			var vide='<small><span style="text-align:center; border: 1pt dotted #939393 ; padding: 1pt; margin-left: 0px; margin-right: 0px; background:red">With the ANY relation, a value for HEAD must be entered in the Pole field....</span></small>';
+			$("#placeholder").html(vide);	
+		}
+		return;
+	}
+	else {
+		document.getElementById("poleID").value="";
+	}
+	
+    var lemmeDep2search="";
+    for (var index in trameForme) {
+		var indexAsNumber=Number(index);
+		var refdelakey=trameForme[index];
+
+		/* il faut tester si le DEP en cours correspond au lemmeDep2search */
+
+		var tmpIdentAndRelationAtThisPos=dicNum2annotation[refdelakey[relation_annot_For_grapherelation-1]]; // ATTENTION : il faut tester si on a une liste de dependance !!!!
+		var ListeDependanceAtThisPos=tmpIdentAndRelationAtThisPos.split(",");
+
+		for (var nbDepAtThisPos=0;nbDepAtThisPos<ListeDependanceAtThisPos.length;nbDepAtThisPos++) {
+			var IdentAndRelationAtThisPos=ListeDependanceAtThisPos[nbDepAtThisPos];
+			var LIdentAndRelationAtThisPos=[];
+			if ((lemmeDep2search == "") || (lemmeDep2search == "...")) {
+				//IdentAndRelationAtThisPos=dicNum2annotation[refdelakey[relation_annot_For_grapherelation-1]]; 
+				IdentAndRelationAtThisPos=IdentAndRelationAtThisPos.replaceAll("(","//");
+				IdentAndRelationAtThisPos=IdentAndRelationAtThisPos.replaceAll(")","");
+				LIdentAndRelationAtThisPos=IdentAndRelationAtThisPos.split("//"); // a refaire !!!
+			}
+			else {
+				if ((lemmeDep2search in DictionnaireCategorie) && (lemmeDep2search == dicNum2categorie[trameForme[index][2]] )) {
+					// IdentAndRelationAtThisPos=dicNum2annotation[refdelakey[relation_annot_For_grapherelation-1]]; 
+					IdentAndRelationAtThisPos=IdentAndRelationAtThisPos.replaceAll("(","//");
+					IdentAndRelationAtThisPos=IdentAndRelationAtThisPos.replaceAll(")","");
+					LIdentAndRelationAtThisPos=IdentAndRelationAtThisPos.split("//"); // a refaire !!!
+				}
+			}
+			/* on regarde maintenant si le lemme retenu contient la bonne relation */
+			if (LIdentAndRelationAtThisPos.length>1) {
+				//alert(LIdentAndRelationAtThisPos);
+				var IdentRelationAtThisPos=Number(LIdentAndRelationAtThisPos[1]);
+				var RelationAtThisPos=LIdentAndRelationAtThisPos[0];
+				if ((RelationAtThisPos==relation) || ((relation == "ANY") && (RelationAtThisPos!=""))) {
+					//if (RelationAtThisPos==relation) {
+					var refdelakey2=trameForme[IdentRelationAtThisPos];
+					var verif=0;
+					//alert(lemmeGouv2search+"|"+dicNum2lemme[trameForme[IdentRelationAtThisPos][1]]);
+					if ((lemmeGouv2search == "") || (lemmeGouv2search == "...")) {
+						verif=1;
+					}
+					else {
+						if (lemmeGouv2search in DictionnaireLemme) {
+							if ((lemmeGouv2search == dicNum2lemme[trameForme[IdentRelationAtThisPos][1]])
+								&&
+								(lemmeGouvPos2search == dicNum2categorie[trameForme[IdentRelationAtThisPos][2]]))
+							
+								{
+								verif=1;
+							}
+						}
+					}
+					if (verif ==1) {
+						//alert("OK:"+lemmeGouv2search+"|"+dicNum2lemme[trameForme[IdentRelationAtThisPos][1]]);
+						var LGrelation=0;
+						var POSDEPENDANT="-";
+						if (indexAsNumber >= IdentRelationAtThisPos) {
+							var tmplg=0;
+							for (var k=IdentRelationAtThisPos+1;k<indexAsNumber;k++) {
+								if (!(dicNum2forme[trameForme[k][0]] in dictionnairedesdelims)) {
+									tmplg++;
+								}
+							}
+							LGrelation=Number(tmplg);
+							POSDEPENDANT="POST";
+						}
+						else {
+							var tmplg=0;
+							for (var k=indexAsNumber+1;k<IdentRelationAtThisPos;k++) {
+								if (!(dicNum2forme[trameForme[k][0]] in dictionnairedesdelims)) {
+									tmplg++;
+								}
+							}
+							LGrelation=Number(tmplg);
+							POSDEPENDANT="ANTE";
+						}
+						//var patronencours=relation+"//"+dicNum2lemme[refdelakey[1]]+"//"+dicNum2lemme[refdelakey2[1]];
+						//******************* Ajout des positions pour concordance
+						// ajout de IdentRelationAtThisPos
+						var cle=RelationAtThisPos+"//"+dicNum2lemme[refdelakey2[1]]+"//"+dicNum2categorie[refdelakey[2]];
+						if (!($.isArray(dictionnairedespositionsdesrelationsentrelemmes[cle]))) {
+							dictionnairedespositionsdesrelationsentrelemmes[cle]=new Array();
+						}
+						dictionnairedespositionsdesrelationsentrelemmes[cle].push(IdentRelationAtThisPos);      
+						if (dictionnairedesfrequencesdesrelationsentrelemmes[cle] === undefined) {
+							dictionnairedesfrequencesdesrelationsentrelemmes[cle]=1;
+						}
+						else {
+							dictionnairedesfrequencesdesrelationsentrelemmes[cle]=dictionnairedesfrequencesdesrelationsentrelemmes[cle]+1;
+						}
+						//*******************
+						var patronencours=RelationAtThisPos+"//"+dicNum2categorie[refdelakey[2]]+"//"+dicNum2lemme[refdelakey2[1]];
+						if (patronencours in dicoRelationItems) {
+							var TMPLIST=dicoRelationItems[patronencours];
+							var fqPat=Number(TMPLIST[0]);
+							fqPat++;
+							LGrelation=Number(TMPLIST[1])+Number(LGrelation);
+							var nbPOST=Number(TMPLIST[2]);
+							var nbANTE=Number(TMPLIST[3]);
+							if (POSDEPENDANT == "POST") {nbPOST++};
+							if (POSDEPENDANT == "ANTE") {nbANTE++};
+							dicoRelationItems[patronencours]=[];
+							dicoRelationItems[patronencours].push(fqPat,LGrelation,nbPOST,nbANTE);
+						}
+						else {
+							var nbPOST=0;
+							var nbANTE=0;
+							if (POSDEPENDANT == "POST") {nbPOST++};
+							if (POSDEPENDANT == "ANTE") {nbANTE++};
+							dicoRelationItems[patronencours]=[];
+							dicoRelationItems[patronencours].push(1,LGrelation,nbPOST,nbANTE);
+						}
+					}
+				}
+			}
+		}
+    }
+    var resultFinal=new Array();
+    var LISTEDESRELATIONSPOS= Object.keys(dicoRelationItems);/*.sort(function(a,b){
+	var x = dicoRelationItems[a][0];
+	var y = dicoRelationItems[b][0];
+	return x < y ? 1 : x > y ? -1 : 0;
+    });;*/
+
+    for (var i=0; i<LISTEDESRELATIONSPOS.length;i++) {
+	var listPOS=LISTEDESRELATIONSPOS[i].split("//");
+	var TMPLIST=dicoRelationItems[LISTEDESRELATIONSPOS[i]];
+	var fq=TMPLIST[0];
+	var LGrelation=Number(TMPLIST[1])/Number(fq);
+	LGrelation=LGrelation.toFixed(2);//precise_round(LGrelation,2);
+	var nbPOST=TMPLIST[2];
+	var nbANTE=TMPLIST[3];
+	if (!($.isArray(resultFinal[i]))) {
+	    resultFinal[i]=new Array();
+	}
+	resultFinal[i]=[];
+	resultFinal[i].push(listPOS[2],listPOS[0],listPOS[1],fq,LGrelation,nbPOST,nbANTE); 
+    }
+    /*--------------------------*/
+	var label_result="";
+	var label_context_plus="";
+	if (localStorage.getItem("language") == "fr"){
+		label_result="Liste des dépendances";
+		label_context_plus="Contextes ++";
+	}
+	else {
+		label_result="Dependency List";
+		label_context_plus="Contexts ++";
+	}
+
+    if ((relation == "ANY") && (lemmeGouv2search != "")) {
+		// on ajoute le bouton pour calcul des "phrases" prototypiques...
+		document.getElementById('placeholder').innerHTML = '<h4><span id="labelDependanceDisplay">'+label_result+'</span> (lemme&#8594;pos)<br/>Relation : '+relation+'</h4><p><button class="submit" title="Les phrases prototypiques..." onclick="searchContextesCommunLemmesRelation();"><span>'+label_context_plus+'</span></button></p><table id="searchrelation" class="display" width="50%"></table>';
+		document.getElementById('placeholder').innerHTML +='';
+    }
+    else {
+		document.getElementById('placeholder').innerHTML = '<h4><span id="labelDependanceDisplay">'+label_result+'</span>  (lemme&#8594;pos)<br/>Relation : '+relation+'</h4><table id="searchrelation" class="display" width="50%"></table>';
+    }
+
+    var column_test;
+    if (localStorage.getItem("language") == "fr"){
+      column_test = [
+		{title: "Gouverneur"},
+		{title: "Relation"},
+		{title: "Dépendant"},
+		{title: "Fq Relation"},
+		{title: "Longueur"},
+		{title: "Fq Post"},
+		{title: "Fq Ante"},
+		{title: "Concordance"},
+	    ]
+    } 
+    else {
+      column_test = [
+		{title: "Head"},
+		{title: "Relation"},
+		{title: "Dependent"},
+		{title: "Relation Fq"},
+		{title: "Length"},
+		{title: "Post Fq"},
+		{title: "Ante Fq"},
+		{title: "Concordancer"},
+	    ]
+    }
+    $(document).ready(function() {
+	var table = $('#searchrelation').DataTable ( {
+	    order: [[ 3, "desc" ]],
+	    data:resultFinal,
+	    searchHighlight: true,
+	    "destroy": true,
+	    lengthMenu: [[10, 25, 50,100, -1], [10, 25, 50,100, "All"]],
+		dom: 'Bfrtip',
+		buttons: [
+				'copy', 'csv', 'excel', 'pdf', 'print'
+			],
+	    columns: column_test,
+	    columnDefs: [ 
+		{
+		    "targets": 7,
+		    "data": null,
+		    /*"defaultContent": "<button value=\"C\"><i class=\"right\"></i></button>"*/
+		    "defaultContent": "<button value=\"C\" class=\"btnC\"></button>"
+		} ,
+		/* A FAIRE !!!
+		  {
+		    "targets": 8,
+		    "data": null,
+		    "defaultContent": "<button value=\"S\"><i class=\"rectD\"></i></button>"
+		} ,*/
+	    ]
+	});
+	$('#searchrelation tbody').on( 'click', 'button', function () {
+	    var data = table.row( $(this).parents('tr') ).data();
+	    //var a=document.getElementById('poleID');
+	    //a.value = data[0];
+	    //alert("0:"+data[0]+",1:"+data[1]+",2:"+data[2]+",3:"+data[3]+",4:"+data[4]+",5:"+data[5]+",6:"+data[6]);
+	    var label=data[1]+"//"+data[0]+"//"+data[2];
+	    var fired_button = $(this).val();
+	    if (fired_button=="C") {
+			concordanceLemmesRelation(label);getLanguage();
+	    }
+	    /* A FAIRE !!!
+	    if (fired_button=="S") {
+		cartesectionLemmesRelation(label);
+	    }
+	    */
+	} );
+ 	
+    });
+}
+/************************************************************************************************/
+function concordanceLemmesRelation(inputLemmesRelation) {
+    var listePara=inputLemmesRelation.split("//");
+    var relation2scan=listePara[0];
+    var AnnotationOutput=annotationencoursOUT;
+	var lgcontexte = document.getElementById("lgcontexteID").value;
+	if (lgcontexte == "") {
+	document.getElementById("lgcontexteID").value = 10;
+	lgcontexte=10;
+    }
+    var DictionnaireDesItems = new Object();
+    var DictionnaireNumDesItems = new Object();
+    if (nombredannotation > 1 ) {
+	if (AnnotationOutput==1) {
+	    DictionnaireDesItems = jQuery.extend({}, DictionnaireSource);
+	    DictionnaireNumDesItems=jQuery.extend({}, dicNum2forme);
+	}
+	if (AnnotationOutput==2) {
+	    DictionnaireDesItems = jQuery.extend({}, DictionnaireLemme);
+	    DictionnaireNumDesItems=jQuery.extend({}, dicNum2lemme);
+	}
+	if (AnnotationOutput==3) {
+	    DictionnaireDesItems = jQuery.extend({}, DictionnaireCategorie);
+	    DictionnaireNumDesItems=jQuery.extend({}, dicNum2categorie);
+	}
+	if (AnnotationOutput>3) {
+	    DictionnaireDesItems = jQuery.extend({}, DictionnaireAnnotation);
+	    DictionnaireNumDesItems=jQuery.extend({}, dicNum2annotation);
+	}
+    }
+    else {
+	DictionnaireDesItems = jQuery.extend({}, DictionnaireSource);
+	DictionnaireNumDesItems=jQuery.extend({}, dicNum2forme);
+    }
+    // a changer...
+    var annotationencoursIndex=AnnotationOutput-1;
+    /*--------------------------*/
+	var insertaudio="<audioFilePosition id=\"AudioNaija\" style=\"background-color: #2fcf2d;color:black\"><small id='tip_lecteur2'>(clic sur un mot : lecture fichier audio)</small></audioFilePosition><p><hr/></p>";
+    //$("#placeholder").html("");
+    //$("#placeholder").html(insertaudio);
+    document.getElementById("placeholder").innerHTML ="";
+    document.getElementById("placeholder").innerHTML =insertaudio;
+    var table='';
+    table += '<div id=\"passage-text\" class=\"passage\"><table id="CONCORDANCE" class="display" width="100%">';
+    /*--------------------------*/
+    var PARTITION =PARTITION_DEFAULT;
+    var LISTESDESPARTIES=new Object(); 
+    var DicoDesPositionsDesPartiesPourSections=new Object(); 
+    var positionMaxG=0;
+    var positionMaxD=0;
+
+    /* Inutile ??
+    if (PARTITION != '') {
+	LISTESDESPARTIES=Object.keys(cadre[PARTITION]);
+	for (var j=0;j<LISTESDESPARTIES.length;j++) {
+	    var listepositions = cadre[PARTITION][LISTESDESPARTIES[j]];
+	    for (var k=0;k<(listepositions.length);k=k+2) {
+		var deb = listepositions[k];
+		var tmpk=k+1;
+		var fin = listepositions[tmpk];
+		DicoDesPositionsDesPartiesPourSections[deb]=PARTITION+"="+LISTESDESPARTIES[j]+"//"+deb+"//"+fin;
+
+	    }
+	}
+	//var firstIndexTrame=Object.keys(trameForme)[0];
+	//var j=Number(firstIndexTrame);
+	//for (var k=1;k<firstIndexTrame;k++) {
+	//    if (k in DicoDesPositionsDesPartiesPourSections) {
+	//	table+= '<tr><td colspan="4"><span style="font-size:11px;color:red;font-weight: bold;font-variant: small-caps;">'+DicoDesPositionsDesPartiesPourSections[k]+'</span></td></tr>';
+	//    }
+	//}
+    }
+    else {
+	positionMaxG=0;
+	positionMaxD=positionsurlatrame;
+    }
+    */
+
+    var nbContexte=0;
+    var partieEnCours="";
+    
+    // pb sur contexte droit...
+    positionMaxG=0;
+    positionMaxD=positionsurlatrame;
+
+    /*--------------------------*/
+    for (var indexPos in dictionnairedespositionsdesrelationsentrelemmes[inputLemmesRelation]) {
+	var index=dictionnairedespositionsdesrelationsentrelemmes[inputLemmesRelation][indexPos];
+	//alert("INDEX:"+index+"//"+inputLemmesRelation);
+
+	/* Inutile ???
+	if (index in DicoDesPositionsDesPartiesPourSections) {
+	    if (DicoDesPositionsDesPartiesPourSections[index] != "ENDPARTIE") {
+		
+		var DDDD=DicoDesPositionsDesPartiesPourSections[index].split("//");
+		var labelPartie=DDDD[0];
+		positionMaxG=Number(DDDD[1]);
+		positionMaxD=Number(DDDD[2]);
+		alert(labelPartie+":"+positionMaxG+":"+positionMaxD);
+		//table+= '<tr><td colspan="4"><span style="font-size:11px;color:red;font-weight: bold;font-variant: small-caps;">'+labelPartie+'</span></td></tr>';
+	    }
+	}
+	fin de Inutile ??*/
+
+	var item = DictionnaireNumDesItems[trameForme[index][annotationencoursIndex]];
+	var contexteG="";
+	var contexteD="";
+	var nbItemGauche=0;
+	var nbItemDroite=0;
+	/* a droite */
+	var posIndex=Number(index)+1;
+	while (nbItemDroite <= lgcontexte) {
+	    if ((posIndex in trameForme) && (posIndex <= positionMaxD)) {
+		var item2 = DictionnaireNumDesItems[trameForme[posIndex][annotationencoursIndex]];
+		if (!(dicNum2forme[trameForme[posIndex][0]] in dictionnairedesdelims))  {
+		    nbItemDroite++;
+		    if (nombredannotation > 1) {
+			if (nombredannotation > 3) {
+			    contexteD+="<a style=\"text-decoration:none\" href=\"#\" onmouseover=\"Tip('<p>Position : "+posIndex+"<br/>(1):"+ dicNum2forme[trameForme[posIndex][0]] + "<br/>(2):"+ dicNum2lemme[trameForme[posIndex][1]] +"<br/>(3):"+ dicNum2categorie[trameForme[posIndex][2]];
+				// audio ----------------------------------------------------------------
+				    var audioFile=dicNum2annotation[trameForme[posIndex][9]];
+					var paraAudio=dicNum2annotation[trameForme[posIndex][8]];
+					//console.log("D : "+paraAudio);
+					var listParaAudio=paraAudio.split("|");
+					//console.log("D : "+listParaAudio);
+					var beginWord=listParaAudio[0];
+					//var endWord=listParaAudio[1];
+					var LvaluebeginWord=beginWord.split("=");
+					//var LvalueendWord=endWord.split("=");
+					var valuebeginWord=Number(LvaluebeginWord[1])/1000;
+					valuebeginWord=Math.trunc(valuebeginWord);
+					//var valueendWord=Number(LvalueendWord[1])/1000;
+					//var valueDurationWord=valueendWord-valuebeginWord;
+				    //console.log("G:"+audioFile);
+				//-----------------------------------------------------------------------
+			    for (var tmpAnnot=3;tmpAnnot<nombredannotation;tmpAnnot++) {
+				var kk=tmpAnnot+1;
+				contexteD+="<br/>("+ kk +"):"+ dicNum2annotation[trameForme[posIndex][tmpAnnot]];
+			    }
+			    //if ((document.getElementById('numAnnotRelationID').value == "") | (document.getElementById('relationID').value == "")) {
+			    //contexteD+="</p>')\" onmouseout=\"UnTip()\" rel=\""+item2+"\">"+item2+"</a>";
+			    //}
+			    //else {
+			    //var rel = document.getElementById('relationID').value;
+			    var rel = relation2scan;
+				var ident = relation_annot_For_grapherelation;
+			    var listerel2=dicNum2annotation[trameForme[posIndex][ident-1]];
+			    var ListeDependanceAtThisPos=listerel2.split(",");
+			    var test = "bad";
+			    for (var nbDepAtThisPos=0;nbDepAtThisPos<ListeDependanceAtThisPos.length;nbDepAtThisPos++) {
+				var rel2=ListeDependanceAtThisPos[nbDepAtThisPos];
+				rel2=rel2.replaceAll("(","//");
+				rel2=rel2.replaceAll(")","");
+				var Lrel=rel2.split("//");
+				if (((rel == Lrel[0]) || (rel == "ANY"))  && ( Lrel[1] == index )) {
+				    test = "ok";
+				}
+			    }
+			    if (test == "ok") {
+				contexteD+="</p>')\" onmouseout=\"UnTip()\" onclick=\"getLanguage();playAudioNaija(\'"+audioFile+"#t="+valuebeginWord+",10\');return false;\" rel=\""+item2+"\"><span style=\"background-color:yellow\">"+item2+"</span></a>";
+			    }
+			    else {
+				contexteD +='</p>\')" onmouseout="UnTip()" onclick="getLanguage();playAudioNaija(\''+audioFile+'#t='+valuebeginWord+',10\');return false;" rel="' +
+					    item2 +
+					    '" >' +
+					    item2 +
+					    "</a>";
+			    }
+			    //}
+			}
+			else {
+			    contexteD+="<a style=\"text-decoration:none\" href=\"#\" onmouseover=\"Tip('<p>Position : "+posIndex+"<br/>(1):"+ dicNum2forme[trameForme[posIndex][0]] + "<br/>(2):"+ dicNum2lemme[trameForme[posIndex][1]] +"<br/>(3):"+ dicNum2categorie[trameForme[posIndex][2]]+"</p>')\" onmouseout=\"UnTip()\" rel=\""+item2+"\">"+item2+"</a>";
+			}
+		    }
+		    else {
+			contexteD+=item2;
+		    }
+		}
+		else {
+		    //contexteD+=item2;
+		    contexteD+=item2;
+		}
+		posIndex++;
+	    }
+	    else {
+		nbItemDroite=lgcontexte+1;
+	    }
+	}
+	/* a gauche */
+	posIndex=Number(index)-1;
+	while (nbItemGauche <= lgcontexte) {
+	    if ((posIndex in trameForme) && (posIndex > positionMaxG)) {
+		var item2 = DictionnaireNumDesItems[trameForme[posIndex][annotationencoursIndex]];
+		if (!(dicNum2forme[trameForme[posIndex][0]] in dictionnairedesdelims))  {
+		    nbItemGauche++;
+		    if (nombredannotation > 1) {
+			if (nombredannotation > 3) {
+			    var tmpContext="<a style=\"text-decoration:none\" href=\"#\" onmouseover=\"Tip('<p>Position : "+posIndex+"<br/>(1):"+ dicNum2forme[trameForme[posIndex][0]] + "<br/>(2):"+ dicNum2lemme[trameForme[posIndex][1]] +"<br/>(3):"+ dicNum2categorie[trameForme[posIndex][2]];
+				//-- audioc----------------------------------------------------
+					var audioFile=dicNum2annotation[trameForme[posIndex][9]];
+					var paraAudio=dicNum2annotation[trameForme[posIndex][8]];
+					//console.log(posIndex+ "G :"+paraAudio);
+					var listParaAudio=paraAudio.split("|");
+					//console.log(posIndex+ " G :"+listParaAudio);
+					var beginWord=listParaAudio[0];
+					//var endWord=listParaAudio[1];
+					var LvaluebeginWord=beginWord.split("=");
+					//var LvalueendWord=endWord.split("=");
+					var valuebeginWord=Number(LvaluebeginWord[1])/1000;
+					valuebeginWord=Math.trunc(valuebeginWord);
+					//var valueendWord=Number(LvalueendWord[1])/1000;
+					//var valueDurationWord=valueendWord-valuebeginWord;
+				    //console.log("G:"+audioFile);
+				//-----------------------------------------------------------
+			    for (var tmpAnnot=3;tmpAnnot<nombredannotation;tmpAnnot++) {
+				var kk=tmpAnnot+1;
+				tmpContext+="<br/>("+ kk +"):"+ dicNum2annotation[trameForme[posIndex][tmpAnnot]];
+			    }
+			    //if ((document.getElementById('numAnnotRelationID').value == "") | (document.getElementById('relationID').value == "")) {
+				//tmpContext+="</p>')\" onmouseout=\"UnTip()\" rel=\""+item2+"\">"+item2+"</a>";
+				//contexteG=tmpContext+contexteG;
+			    //}
+			    //else {
+			    var rel = relation2scan; //document.getElementById('relationID').value;
+				var ident = relation_annot_For_grapherelation;
+			    var listerel2=dicNum2annotation[trameForme[posIndex][ident-1]];
+			    var ListeDependanceAtThisPos=listerel2.split(",");
+			    var test = "bad";
+			    for (var nbDepAtThisPos=0;nbDepAtThisPos<ListeDependanceAtThisPos.length;nbDepAtThisPos++) {
+				var rel2=ListeDependanceAtThisPos[nbDepAtThisPos];
+				rel2=rel2.replaceAll("(","//");
+				rel2=rel2.replaceAll(")","");
+				var Lrel=rel2.split("//");
+				if (((rel == Lrel[0]) || (rel == "ANY"))  && ( Lrel[1] == index )) {
+				    test = "ok";
+				}
+			    }
+			    if (test == "ok") {
+				tmpContext+="</p>')\" onmouseout=\"UnTip()\" onclick=\"playAudioNaija(\'"+audioFile+"#t="+valuebeginWord+",10\');return false;\"  rel=\""+item2+"\"><span style=\"background-color:yellow\">"+item2+"</span></a>";
+				contexteG=tmpContext+contexteG;
+			    }
+			    else {
+				tmpContext +='</p>\')" onmouseout="UnTip()" onclick="playAudioNaija(\''+audioFile+'#t='+valuebeginWord+',10\');return false;" rel="' +
+					    item2 +
+					    ' ">' +
+					    item2 +
+					    "</a>";
+					contexteG = tmpContext + contexteG;
+			    }
+			    //}			
+			}
+			else {
+			    contexteG="<a style=\"text-decoration:none\" href=\"#\" onmouseover=\"Tip('<p>Position : "+posIndex+"<br/>(1):"+ dicNum2forme[trameForme[posIndex][0]] + "<br/>(2):"+ dicNum2lemme[trameForme[posIndex][1]] +"<br/>(3):"+ dicNum2categorie[trameForme[posIndex][2]]+"</p>')\" onmouseout=\"UnTip()\" rel=\""+item2+"\">"+item2+"</a>"+contexteG;
+			}
+		    }
+		    else {
+			contexteG=item2+contexteG;
+		    }
+		}
+		else {
+		    contexteG=item2+contexteG;
+		}
+		posIndex--;
+	    }
+	    else {
+		nbItemGauche=lgcontexte+1;
+	    }
+	}
+	nbContexte++;
+	/* MODIF 2018 ****************************************************/
+	var TMPPARTIENAME="";
+	if (PARTITION != '') {
+	    LISTESDESPARTIES=Object.keys(cadre[PARTITION]);
+	    for (var j=0;j<LISTESDESPARTIES.length;j++) {
+		var listepositions = cadre[PARTITION][LISTESDESPARTIES[j]];
+		for (var k=0;k<(listepositions.length);k=k+2) {
+		    var deb = Number(listepositions[k]);
+		    var tmpk=k+1;
+		    var fin = Number(listepositions[tmpk]);
+		    var tmpIndex=Number(index);
+		    if ((tmpIndex<=fin) && (tmpIndex>=deb)) {
+			TMPPARTIENAME=LISTESDESPARTIES[j];
+		    }
+		}
+	    }
+	}
+	/****************************************************************/
+	if (nombredannotation > 1 ) {
+	    if (nombredannotation > 3) {
+		table +='<tr><td width="2%">'+nbContexte+'</td><td>'+TMPPARTIENAME+'</td><td style="text-align:right;" width="45%">'+contexteG+'</td><td style="text-align:center;" width="8%"><a style="text-decoration:none" href="#" onmouseover="Tip(\'<p>Position : '+index+'<br/>(1):'+ dicNum2forme[trameForme[index][0]] + '<br/>(2):' + dicNum2lemme[trameForme[index][1]] + '<br/>(3):' + dicNum2categorie[trameForme[index][2]];
+		//-- audio -------------------------
+			var audioFile=dicNum2annotation[trameForme[index][9]];
+			var paraAudio=dicNum2annotation[trameForme[index][8]];
+			var listParaAudio=paraAudio.split("|");
+			//console.log(listParaAudio);
+			var beginWord=listParaAudio[0];
+			//var endWord=listParaAudio[1];
+			var LvaluebeginWord=beginWord.split("=");
+			//var LvalueendWord=endWord.split("=");
+			var valuebeginWord=Number(LvaluebeginWord[1])/1000;
+			valuebeginWord=Math.trunc(valuebeginWord);
+		//----------------------------------
+		for (var tmpAnnot=3;tmpAnnot<nombredannotation;tmpAnnot++) {
+		    var kk=tmpAnnot+1;
+		    table +="<br/>("+ kk +"):"+ dicNum2annotation[trameForme[index][tmpAnnot]];
+		}
+		table +=
+			'</p>\')" onmouseout="UnTip()" onclick="playAudioNaija(\''+audioFile+'#t='+valuebeginWord+',10\');return false;" rel="' +
+			    item +
+			    '" >' +
+			    item +
+			    '</a></td><td style="text-align:left;" width="45%">' +
+			    contexteD +
+			    "</td></tr>";
+	    }
+	    else {
+		table +='<tr><td width="2%">'+nbContexte+'</td><td>'+TMPPARTIENAME+'</td><td style="text-align:right;" width="45%">'+contexteG+'</td><td style="text-align:center;" width="8%"><a style="text-decoration:none" href="#" onmouseover="Tip(\'<p>(1):'+ dicNum2forme[trameForme[index][0]] + '<br/>(2):' + dicNum2lemme[trameForme[index][1]] + '<br/>(3):' + dicNum2categorie[trameForme[index][2]] +'</p>\')" onmouseout="UnTip()" rel="'+item+'">'+item+'</a></td><td style="text-align:left;" width="45%">'+contexteD+'</td></tr>';
+	    }
+	}
+	else {
+	    table +='<tr><td width="2%">'+nbContexte+'</td><td>'+TMPPARTIENAME+'</td><td style="text-align:right;" width="45%">'+contexteG+'</td><td style="text-align:center;" width="8%">'+item+'</td><td style="text-align:left;" width="45%">'+contexteD+'</td></tr>';
+	}
+    }
+    table +='</table></div>';
+    document.getElementById("placeholder").innerHTML +=table;
+	var column_test;
+    if (localStorage.getItem("language") == "fr"){
+      column_test = [
+		{ title: "N°" },
+		{ title: "Partie" },
+		{ title: "Contexte Gauche" },
+		{ title: "Pôle" },
+		{ title: "Contexte Droit" }
+	    ]
+    } else {
+      column_test = [
+		{ title: "N°" },
+		{ title: "Part" },
+		{ title: "Left Context" },
+		{ title: "Pole" },
+		{ title: "Right Context" }
+	    ]
+    }
+    $(document).ready(function() {
+	$('#CONCORDANCE').DataTable ( {
+	    order: [[ 1, "asc" ]],
+	    lengthMenu: [[10, 25, 50,100, -1], [10, 25, 50,100, "All"]],
+	    searchHighlight: true,
+	    "destroy": true,
+	    columns: column_test,
+		"search": { // ne fonctionne pas....
+		"regex": true
+            }
+	})
+    });
+}
+
+//-----------------------------------------------------------------------------------
+function intersection(A,B){
+var result = new Array();
+for (i=0; i<A.length; i++) {
+    for (j=0; j<B.length; j++) {
+        if (A[i] == B[j] && $.inArray(A[i],result) == -1) {
+            result.push(A[i]);
+        }
+    }
+}
+return result;
+}
+//-----------------------------------------------------------------------------------
+function removeDuplicates(arr){
+    let unique_array = []
+    for(let i = 0;i < arr.length; i++){
+        if(unique_array.indexOf(arr[i]) == -1){
+            unique_array.push(arr[i])
+        }
+    }
+    return unique_array
+}
+//-----------------------------------------------------------------------------------
+function searchContextesCommunLemmesRelation() {
+    
+    var LISTEDESCLESRELATIONSPARFREQ= Object.keys(dictionnairedesfrequencesdesrelationsentrelemmes).sort(function(a,b){
+	var x = dictionnairedesfrequencesdesrelationsentrelemmes[a];/*toLowerCase();*/
+	var y = dictionnairedesfrequencesdesrelationsentrelemmes[b];/*.toLowerCase();*/
+	return x < y ? 1 : x > y ? -1 : 0;
+    });
+    //alert(LISTEDESCLESRELATIONSPARFREQ);
+    positionsMaximisantlesrelations= new Array;
+    var curseur=0;
+    while (curseur < LISTEDESCLESRELATIONSPARFREQ.length-1) {
+		var ListeDesPositionsDesContextesMax=dictionnairedespositionsdesrelationsentrelemmes[LISTEDESCLESRELATIONSPARFREQ[curseur]];   
+		var k=curseur+1; 
+		var insectVide;
+		var tmpIntersect= ListeDesPositionsDesContextesMax;
+		//while ((tmpIntersect.length >= 1) && (k <= LISTEDESCLESRELATIONSPARFREQ.length-1)) {
+		while ((tmpIntersect.length >= 0) && (k <= LISTEDESCLESRELATIONSPARFREQ.length-1)) {
+			tmpIntersect=intersection(ListeDesPositionsDesContextesMax,dictionnairedespositionsdesrelationsentrelemmes[LISTEDESCLESRELATIONSPARFREQ[k]]);
+			//console.log("A1:"+ListeDesPositionsDesContextesMax);
+			//console.log("A2:"+dictionnairedespositionsdesrelationsentrelemmes[LISTEDESCLESRELATIONSPARFREQ[k]]);
+			//console.log("I:"+LISTEDESCLESRELATIONSPARFREQ[k]+":"+tmpIntersect);
+			if (tmpIntersect.length > 0) {
+				ListeDesPositionsDesContextesMax=tmpIntersect;
+				var element2keep=tmpIntersect[0];
+				//console.log("ADD"+element2keep);
+				positionsMaximisantlesrelations.push(element2keep);
+				//console.log("MAX:"+positionsMaximisantlesrelations);
+				//-----------------------------------------------------------------------------------
+				// il faut vérifier parmi celles de A qui ne sont pas dans B si elles sont uniques... VERIF EN COURS
+				//console.log("INTER : "+tmpIntersect);
+				var tmpArray=dictionnairedespositionsdesrelationsentrelemmes[LISTEDESCLESRELATIONSPARFREQ[curseur]];
+				//console.log("DEPART : "+tmpArray);
+				var tmpArrayUnique=new Array;
+				for (i=0; i<tmpArray.length; i++) {
+					//console.log(i+" : "+tmpArray[i]);
+					if ($.inArray(tmpArray[i],tmpIntersect) == -1) {
+						var verifUnique=0;
+						for (j=0; j<LISTEDESCLESRELATIONSPARFREQ.length; j++) {
+							if (j != curseur) {
+								if ($.inArray(tmpArray[i],dictionnairedespositionsdesrelationsentrelemmes[LISTEDESCLESRELATIONSPARFREQ[j]]) != -1) {
+									verifUnique=i;
+									//console.log("RESTE : "+dictionnairedespositionsdesrelationsentrelemmes[LISTEDESCLESRELATIONSPARFREQ[j]]);
+								}
+							}
+						}
+						//console.log("RESU : "+verifUnique);
+						if (verifUnique == 0) {
+							tmpArrayUnique.push(tmpArray[i])
+			    
+						}
+					}
+				}
+				if (tmpArrayUnique.length > 0) {
+					//console.log("RESU LISTE : "+tmpArrayUnique);
+					positionsMaximisantlesrelations.push(tmpArrayUnique[0]);
+					//console.log("positionsMaximisantlesrelations : "+positionsMaximisantlesrelations);
+				}
+				//----------------------------------------------------------------------------------*/
+			}
+			else {
+				//-----------------------------------------------------------------------------------
+				// il faut vérifier parmi celles de A si elles sont uniques... VERIF EN COURS
+				var tmpArray=dictionnairedespositionsdesrelationsentrelemmes[LISTEDESCLESRELATIONSPARFREQ[curseur]];
+				//console.log("DEPART : "+tmpArray);
+				var tmpArrayUnique=new Array;
+				for (i=0; i<tmpArray.length; i++) {
+					//console.log(i+" : "+tmpArray[i]);
+					var verifUnique=0;
+					for (j=0; j<LISTEDESCLESRELATIONSPARFREQ.length; j++) {
+						if (j != curseur) {
+							if ($.inArray(tmpArray[i],dictionnairedespositionsdesrelationsentrelemmes[LISTEDESCLESRELATIONSPARFREQ[j]]) != -1) {
+								verifUnique=i;
+								//console.log("RESTE : "+dictionnairedespositionsdesrelationsentrelemmes[LISTEDESCLESRELATIONSPARFREQ[j]]);
+							}
+						}
+					}
+					//console.log("RESU : "+verifUnique);
+					if (verifUnique == 0) {
+						tmpArrayUnique.push(tmpArray[i])
+					}
+				}
+				if (tmpArrayUnique.length > 0) {
+					//console.log("RESU LISTE : "+tmpArrayUnique);
+					positionsMaximisantlesrelations.push(tmpArrayUnique[0]);
+					//console.log("positionsMaximisantlesrelations : "+positionsMaximisantlesrelations);
+				}
+				//-----------------------------------------------------------------------------------
+				insectVide=k;
+				//console.log(insectVide);
+				tmpIntersect=dictionnairedespositionsdesrelationsentrelemmes[LISTEDESCLESRELATIONSPARFREQ[curseur]];
+				ListeDesPositionsDesContextesMax=dictionnairedespositionsdesrelationsentrelemmes[LISTEDESCLESRELATIONSPARFREQ[curseur]];
+			}
+			k=k+1;
+		}
+		curseur=curseur+1;
+    }
+    //--------------------------------------------------------------------------------
+    // on verifie qu'il n'y a pas des elements uniques dans la derniere
+    var tmpArray=dictionnairedespositionsdesrelationsentrelemmes[LISTEDESCLESRELATIONSPARFREQ[LISTEDESCLESRELATIONSPARFREQ.length-1]];
+    //console.log("DEPART : "+tmpArray);
+    var tmpArrayUnique=new Array;
+    for (i=0; i<tmpArray.length; i++) {
+		//console.log(i+" : "+tmpArray[i]);
+		var verifUnique=0;
+		for (j=0; j<LISTEDESCLESRELATIONSPARFREQ.length-1; j++) {
+			if ($.inArray(tmpArray[i],dictionnairedespositionsdesrelationsentrelemmes[LISTEDESCLESRELATIONSPARFREQ[j]]) != -1) {
+				verifUnique=i;
+				//console.log("RESTE : "+dictionnairedespositionsdesrelationsentrelemmes[LISTEDESCLESRELATIONSPARFREQ[j]]);
+			}
+		}
+		//console.log("RESU : "+verifUnique);
+		if (verifUnique == 0) {
+			tmpArrayUnique.push(tmpArray[i])  
+		}
+    }
+    if (tmpArrayUnique.length > 0) {
+		//console.log("RESU LISTE : "+tmpArrayUnique);
+		positionsMaximisantlesrelations.push(tmpArrayUnique[0]);
+		//console.log("positionsMaximisantlesrelations : "+positionsMaximisantlesrelations);
+    }
+    //-------------------------------------------------------------------------------
+    // il reste à rendre uniques les éléments conservés...
+    positionsMaximisantlesrelations=removeDuplicates(positionsMaximisantlesrelations);
+    concordanceLemmesRelationMaxi();
+}
+//-----------------------------------------------------------------------------------
+function concordanceLemmesRelationMaxi() {
+    var relation2scan="ANY";
+	var lgcontexte = document.getElementById("lgcontexteID").value;
+    if (lgcontexte == "") {
+		document.getElementById("lgcontexteID").value = 10;
+		lgcontexte=10;
+    }
+    var AnnotationOutput=annotationencoursOUT;
+    var DictionnaireDesItems = new Object();
+    var DictionnaireNumDesItems = new Object();
+    if (nombredannotation > 1 ) {
+		if (AnnotationOutput==1) {
+			DictionnaireDesItems = jQuery.extend({}, DictionnaireSource);
+			DictionnaireNumDesItems=jQuery.extend({}, dicNum2forme);
+		}
+		if (AnnotationOutput==2) {
+			DictionnaireDesItems = jQuery.extend({}, DictionnaireLemme);
+			DictionnaireNumDesItems=jQuery.extend({}, dicNum2lemme);
+		}
+		if (AnnotationOutput==3) {
+			DictionnaireDesItems = jQuery.extend({}, DictionnaireCategorie);
+			DictionnaireNumDesItems=jQuery.extend({}, dicNum2categorie);
+		}
+		if (AnnotationOutput>3) {
+			DictionnaireDesItems = jQuery.extend({}, DictionnaireAnnotation);
+			DictionnaireNumDesItems=jQuery.extend({}, dicNum2annotation);
+		}
+    }
+    else {
+		DictionnaireDesItems = jQuery.extend({}, DictionnaireSource);
+		DictionnaireNumDesItems=jQuery.extend({}, dicNum2forme);
+    }
+    // a changer...
+    var annotationencoursIndex=AnnotationOutput-1;
+    /*--------------------------*/
+    var table='';
+    table += '<table id="CONCORDANCE" class="display" width="100%">';
+    /*--------------------------*/
+    var PARTITION =PARTITION_DEFAULT;//document.getElementById('IDPartie').value;
+    var LISTESDESPARTIES=new Object(); 
+    var DicoDesPositionsDesPartiesPourSections=new Object(); 
+    var positionMaxG=0;
+    var positionMaxD=0;
+
+    /* Inutile ??
+    if (PARTITION != '') {
+	LISTESDESPARTIES=Object.keys(cadre[PARTITION]);
+	for (var j=0;j<LISTESDESPARTIES.length;j++) {
+	    var listepositions = cadre[PARTITION][LISTESDESPARTIES[j]];
+	    for (var k=0;k<(listepositions.length);k=k+2) {
+		var deb = listepositions[k];
+		var tmpk=k+1;
+		var fin = listepositions[tmpk];
+		DicoDesPositionsDesPartiesPourSections[deb]=PARTITION+"="+LISTESDESPARTIES[j]+"//"+deb+"//"+fin;
+
+	    }
+	}
+	//var firstIndexTrame=Object.keys(trameForme)[0];
+	//var j=Number(firstIndexTrame);
+	//for (var k=1;k<firstIndexTrame;k++) {
+	//    if (k in DicoDesPositionsDesPartiesPourSections) {
+	//	table+= '<tr><td colspan="4"><span style="font-size:11px;color:red;font-weight: bold;font-variant: small-caps;">'+DicoDesPositionsDesPartiesPourSections[k]+'</span></td></tr>';
+	//    }
+	//}
+    }
+    else {
+	positionMaxG=0;
+	positionMaxD=positionsurlatrame;
+    }
+    */
+
+    var nbContexte=0;
+    var partieEnCours="";
+    
+    // pb sur contexte droit...
+    positionMaxG=0;
+    positionMaxD=positionsurlatrame;
+
+    /*--------------------------*/
+    for (var indexPos in positionsMaximisantlesrelations) {
+		var index=positionsMaximisantlesrelations[indexPos];
+		//alert("INDEX:"+index+"//"+inputLemmesRelation);
+
+		/* Inutile ???
+		if (index in DicoDesPositionsDesPartiesPourSections) {
+	    if (DicoDesPositionsDesPartiesPourSections[index] != "ENDPARTIE") {
+		
+		var DDDD=DicoDesPositionsDesPartiesPourSections[index].split("//");
+		var labelPartie=DDDD[0];
+		positionMaxG=Number(DDDD[1]);
+		positionMaxD=Number(DDDD[2]);
+		alert(labelPartie+":"+positionMaxG+":"+positionMaxD);
+		//table+= '<tr><td colspan="4"><span style="font-size:11px;color:red;font-weight: bold;font-variant: small-caps;">'+labelPartie+'</span></td></tr>';
+	    }
+		}
+		fin de Inutile ??*/
+
+		var item = DictionnaireNumDesItems[trameForme[index][annotationencoursIndex]];
+		var itemDistribRelation = dicNum2lemme[trameForme[index][1]];
+		var contexteG="";
+		var contexteD="";
+		var distribrelation= new Array;
+		var nbItemGauche=0;
+		var nbItemDroite=0;
+		/* a droite */
+		var posIndex=Number(index)+1;
+		while (nbItemDroite <= lgcontexte) {
+			if ((posIndex in trameForme) && (posIndex <= positionMaxD)) {
+				var item2 = DictionnaireNumDesItems[trameForme[posIndex][annotationencoursIndex]];
+				if (!(dicNum2forme[trameForme[posIndex][0]] in dictionnairedesdelims))  {
+					nbItemDroite++;
+					if (nombredannotation > 1) {
+						if (nombredannotation > 3) {
+							contexteD+="<a style=\"text-decoration:none\" href=\"#\" onmouseover=\"Tip('<p>Position : "+posIndex+"<br/>(1):"+ dicNum2forme[trameForme[posIndex][0]] + "<br/>(2):"+ dicNum2lemme[trameForme[posIndex][1]] +"<br/>(3):"+ dicNum2categorie[trameForme[posIndex][2]];
+							for (var tmpAnnot=3;tmpAnnot<nombredannotation;tmpAnnot++) {
+								var kk=tmpAnnot+1;
+								contexteD+="<br/>("+ kk +"):"+ dicNum2annotation[trameForme[posIndex][tmpAnnot]];
+							}
+							//if ((document.getElementById('numAnnotRelationID').value == "") | (document.getElementById('relationID').value == "")) {
+							//contexteD+="</p>')\" onmouseout=\"UnTip()\" rel=\""+item2+"\">"+item2+"</a>";
+							//}
+							//else {
+							//var rel = document.getElementById('relationID').value;
+							var rel = relation2scan;
+							var ident = relation_annot_For_grapherelation; //document.getElementById('numAnnotRelationID').value;
+							ident=Number(ident);
+							var listerel2=dicNum2annotation[trameForme[posIndex][ident-1]];
+							var ListeDependanceAtThisPos=listerel2.split(",");
+							var test = "bad";
+							for (var nbDepAtThisPos=0;nbDepAtThisPos<ListeDependanceAtThisPos.length;nbDepAtThisPos++) {
+								var rel2=ListeDependanceAtThisPos[nbDepAtThisPos];
+								rel2=rel2.replaceAll("(","//");
+								rel2=rel2.replaceAll(")","");
+								var Lrel=rel2.split("//");
+								if (((rel == Lrel[0]) || (rel == "ANY"))  && ( Lrel[1] == index )) {
+									test = "ok";
+								}
+							}
+							if (test == "ok") {
+								contexteD+="</p>')\" onmouseout=\"UnTip()\" rel=\""+item2+"\"><span style=\"background-color:yellow\">"+item2+"</span></a>";
+								distribrelation.push(Lrel[0]);
+							}
+							else {
+								contexteD+="</p>')\" onmouseout=\"UnTip()\" rel=\""+item2+"\">"+item2+"</a>";
+							}
+							//}
+						}
+						else {
+							contexteD+="<a style=\"text-decoration:none\" href=\"#\" onmouseover=\"Tip('<p>Position : "+posIndex+"<br/>(1):"+ dicNum2forme[trameForme[posIndex][0]] + "<br/>(2):"+ dicNum2lemme[trameForme[posIndex][1]] +"<br/>(3):"+ dicNum2categorie[trameForme[posIndex][2]]+"</p>')\" onmouseout=\"UnTip()\" rel=\""+item2+"\">"+item2+"</a>";
+						}
+					}
+					else {
+						contexteD+=item2;
+					}
+				}
+				else {
+					//contexteD+=item2;
+					contexteD+=item2;
+				}
+				posIndex++;
+			}
+			else {
+				nbItemDroite=lgcontexte+1;
+			}
+		}
+		distribrelation.unshift(itemDistribRelation);
+		/* a gauche */
+		posIndex=Number(index)-1;
+		while (nbItemGauche <= lgcontexte) {
+			if ((posIndex in trameForme) && (posIndex > positionMaxG)) {
+				var item2 = DictionnaireNumDesItems[trameForme[posIndex][annotationencoursIndex]];
+				if (!(dicNum2forme[trameForme[posIndex][0]] in dictionnairedesdelims))  {
+					nbItemGauche++;
+					if (nombredannotation > 1) {
+						if (nombredannotation > 3) {
+							var tmpContext="<a style=\"text-decoration:none\" href=\"#\" onmouseover=\"Tip('<p>Position : "+posIndex+"<br/>(1):"+ dicNum2forme[trameForme[posIndex][0]] + "<br/>(2):"+ dicNum2lemme[trameForme[posIndex][1]] +"<br/>(3):"+ dicNum2categorie[trameForme[posIndex][2]];
+							for (var tmpAnnot=3;tmpAnnot<nombredannotation;tmpAnnot++) {
+								var kk=tmpAnnot+1;
+								tmpContext+="<br/>("+ kk +"):"+ dicNum2annotation[trameForme[posIndex][tmpAnnot]];
+							}
+							//if ((document.getElementById('numAnnotRelationID').value == "") | (document.getElementById('relationID').value == "")) {
+							//tmpContext+="</p>')\" onmouseout=\"UnTip()\" rel=\""+item2+"\">"+item2+"</a>";
+							//contexteG=tmpContext+contexteG;
+							//}
+							//else {
+							var rel = relation2scan; //document.getElementById('relationID').value;
+							var ident = relation_annot_For_grapherelation; //document.getElementById('numAnnotRelationID').value;
+							ident=Number(ident);
+							var listerel2=dicNum2annotation[trameForme[posIndex][ident-1]];
+							var ListeDependanceAtThisPos=listerel2.split(",");
+							var test = "bad";
+							for (var nbDepAtThisPos=0;nbDepAtThisPos<ListeDependanceAtThisPos.length;nbDepAtThisPos++) {
+								var rel2=ListeDependanceAtThisPos[nbDepAtThisPos];
+								rel2=rel2.replaceAll("(","//");
+								rel2=rel2.replaceAll(")","");
+								var Lrel=rel2.split("//");
+								if (((rel == Lrel[0]) || (rel == "ANY"))  && ( Lrel[1] == index )) {
+									test = "ok";
+								}
+							}
+							if (test == "ok") {
+								tmpContext+="</p>')\" onmouseout=\"UnTip()\" rel=\""+item2+"\"><span style=\"background-color:yellow\">"+item2+"</span></a>";
+								contexteG=tmpContext+contexteG;
+								distribrelation.unshift(Lrel[0]);
+							}
+							else {
+								tmpContext+="</p>')\" onmouseout=\"UnTip()\" rel=\""+item2+"\">"+item2+"</a>";
+								contexteG=tmpContext+contexteG;
+							}
+							//}			
+						}
+						else {
+							contexteG="<a style=\"text-decoration:none\" href=\"#\" onmouseover=\"Tip('<p>Position : "+posIndex+"<br/>(1):"+ dicNum2forme[trameForme[posIndex][0]] + "<br/>(2):"+ dicNum2lemme[trameForme[posIndex][1]] +"<br/>(3):"+ dicNum2categorie[trameForme[posIndex][2]]+"</p>')\" onmouseout=\"UnTip()\" rel=\""+item2+"\">"+item2+"</a>"+contexteG;
+						}
+					}
+					else {
+						contexteG=item2+contexteG;
+					}
+				}
+				else {
+					contexteG=item2+contexteG;
+				}
+				posIndex--;
+			}
+			else {
+				nbItemGauche=lgcontexte+1;
+			}
+		}
+		nbContexte++;
+		/* MODIF 2018 ****************************************************/
+		var TMPPARTIENAME="";
+		if (PARTITION != '') {
+			LISTESDESPARTIES=Object.keys(cadre[PARTITION]);
+			for (var j=0;j<LISTESDESPARTIES.length;j++) {
+				var listepositions = cadre[PARTITION][LISTESDESPARTIES[j]];
+				for (var k=0;k<(listepositions.length);k=k+2) {
+					var deb = Number(listepositions[k]);
+					var tmpk=k+1;
+					var fin = Number(listepositions[tmpk]);
+					var tmpIndex=Number(index);
+					if ((tmpIndex<=fin) && (tmpIndex>=deb)) {
+						TMPPARTIENAME=LISTESDESPARTIES[j];
+					}
+				}
+			}
+		}
+		/****************************************************************/
+		if (nombredannotation > 1 ) {
+			if (nombredannotation > 3) {
+				table +='<tr><td width="2%">'+nbContexte+'</td><td>'+TMPPARTIENAME+'</td><td style="text-align:right;" width="45%">'+contexteG+'</td><td style="text-align:center;" width="8%"><a style="text-decoration:none" href="#" onmouseover="Tip(\'<p>Position : '+index+'<br/>(1):'+ dicNum2forme[trameForme[index][0]] + '<br/>(2):' + dicNum2lemme[trameForme[index][1]] + '<br/>(3):' + dicNum2categorie[trameForme[index][2]];
+				for (var tmpAnnot=3;tmpAnnot<nombredannotation;tmpAnnot++) {
+					var kk=tmpAnnot+1;
+					table +="<br/>("+ kk +"):"+ dicNum2annotation[trameForme[index][tmpAnnot]];
+				}
+				table +="</p>')\" onmouseout=\"UnTip()\" rel=\""+item+"\">"+item+"</a></td><td style=\"text-align:left;\" width=\"45%\">"+contexteD+"</td><td>"+distribrelation.join(' ')+"</td></tr>";
+			}
+			else {
+				table +='<tr><td width="2%">'+nbContexte+'</td><td>'+TMPPARTIENAME+'</td><td style="text-align:right;" width="45%">'+contexteG+'</td><td style="text-align:center;" width="8%"><a style="text-decoration:none" href="#" onmouseover="Tip(\'<p>(1):'+ dicNum2forme[trameForme[index][0]] + '<br/>(2):' + dicNum2lemme[trameForme[index][1]] + '<br/>(3):' + dicNum2categorie[trameForme[index][2]] +'</p>\')" onmouseout="UnTip()" rel="'+item+'">'+item+'</a></td><td style="text-align:left;" width="45%">'+contexteD+'</td><td></td></tr>';
+			}
+		}
+		else {
+			table +='<tr><td width="2%">'+nbContexte+'</td><td>'+TMPPARTIENAME+'</td><td style="text-align:right;" width="45%">'+contexteG+'</td><td style="text-align:center;" width="8%">'+item+'</td><td style="text-align:left;" width="45%">'+contexteD+'</td><td></td></tr>';
+		}
+    }
+    table +='</table>';
+    $("#placeholder").html(table);
+    var column_test;
+    if (localStorage.getItem("language") == "fr"){
+      column_test = [
+		{ title: "N°" },
+		{ title: "Partie" },
+		{ title: "Contexte Gauche" },
+		{ title: "Pôle" },
+		{ title: "Contexte Droit" },
+		{ title: "STRUCT. DEP."}
+	    ]
+    } 
+    else {
+      column_test = [
+		{ title: "N°" },
+		{ title: "Part" },
+		{ title: "Left Context" },
+		{ title: "Pole" },
+		{ title: "Right Context" },
+		{ title: "STRUCT. DEP."}
+	    ]
+    }
+    $(document).ready(function() {
+	$('#CONCORDANCE').DataTable ( {
+	    //order: [[ 1, "desc" ]],
+	    lengthMenu: [[10, 25, 50,100, -1], [10, 25, 50,100, "All"]],
+	    searchHighlight: true,
+	    "destroy": true,
+	    columns:  column_test,
+	    "search": { // ne fonctionne pas....
+		"regex": true
+            }
+	})
+    });
+}
