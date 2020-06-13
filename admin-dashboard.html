@@ -1,6 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <link
+    href="import/fontawesome-free/css/all.min.css"
+    rel="stylesheet"
+    type="text/css"
+  />
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -50,9 +55,9 @@
     <link rel="stylesheet" href="import/uprogress.css" />
     <script src="import/xregexp-all.js"></script>
 
-	<script type="text/javascript" language="javascript" src="./import/arbor/arbor.js"></script> 
-	<script type="text/javascript" language="javascript" src="./import/arbor/renderer.js"></script> 
-	<script type="text/javascript" language="javascript" src="./import/arbor/graphics.js"></script> 
+	<script type="text/javascript" language="javascript" src="./import/arbor/arbor.js"></script>
+	<script type="text/javascript" language="javascript" src="./import/arbor/renderer.js"></script>
+	<script type="text/javascript" language="javascript" src="./import/arbor/graphics.js"></script>
 
     <!--<script src="import/audiojs/audio.js"></script>-->
     <script src="import/html5-audio-read-along-master/read-along.js"></script>
@@ -136,7 +141,7 @@
       }
       function setLanguage(lang) {
         localStorage.setItem("language", lang);
-        
+
       }
     </script>
     <!-- <script>
@@ -208,33 +213,33 @@
         </div>
      <!-- </div> -->
     </nav>
-	
+
    <nav class="navbar navbar-expand-sm bg-dark navbar-dark justify-content-end">
     <div class="collapse navbar-collapse flex-grow-1 text-right float-right" id="myNavbar7">
 	<ul class="navbar-nav ml-auto">
 			<li class="nav-item active">
 			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
 			<span class="navbar-toggler-icon"></span>
-			</button> 	
+			</button>
 			</li>
 			<li class="nav-item active">
 			<button
               type="button"
-              class="btn btn-success ml-auto mr-1" 
+              class="btn btn-success ml-auto mr-1"
               onclick="searchRelationLemmePos();getLanguage();"
               id="searchRelationLemmePos"
 			  style="display: none;"
 			>
-            Relation Display 
+            Relation Display
             </button>
 			&nbsp;
 			<span class="navbar-text" id='IDrelationLabel' style="display: none;">Relation</span>&nbsp;<select id='IDRelation' style="display: none;"></select>
 			&nbsp;
 			</li>
-			
+
 		   <li class="nav-item active">
-		   
-		   
+
+
 		   <button
               type="button"
               class="btn btn-success ml-auto mr-1"
@@ -243,8 +248,8 @@
 			  style="display: none;"
             >
             Dépendant
-            </button> 		
-		   
+            </button>
+
            <button
               type="button"
               class="btn btn-success ml-auto mr-1"
@@ -253,7 +258,7 @@
 			  style="display: none;"
             >
             Cooccurrent
-            </button> 		
+            </button>
 			<button
               type="button"
               class="btn btn-success ml-auto mr-1"
@@ -281,14 +286,14 @@
 			<li class="nav-item active">
 			<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent">
 			<span class="navbar-toggler-icon"></span>
-			</button> 	
+			</button>
 			</li>
 	 </ul>
      </div>
     </nav>
-	
-	
-	
+
+
+
     <!--<br />-->
     <div class="container-fluid">
       <div class="row justify-content-between">
@@ -1075,7 +1080,7 @@
 			<br/>
 			<div id="placeholder2" style="overflow-x:auto;overflow-y:auto;"></div>
 			<br/>
-			<div id="Global">	
+			<div id="Global">
 				<div id="page-analysis" class="ct-chart"></div>
 			</div>
 			<div id="Global2">
@@ -1095,7 +1100,56 @@
         </div>
       </div>
     </div>
+    <!--footer-->
+    <footer class="page-footer font-small py-1">
+      <!-- Footer Links -->
+      <div class="bg-dark text-center text-md-left">
+        <div class="row">
+        <!--<hr class="clearfix w-100 d-md-none">-->
+        <!--<div class="col-md-3 mx-auto">-->
+        <!--</div>-->
+          <div class="col-md-2 mx-auto py-1 text-right">
+            <p class="font-weight-bold text-white">Related Links</p>
+          </div>
+          <div class="col-md-1 mx-auto py-1 text-right">
+                <a href="http://naijasyncor.huma-num.fr/" target="_blank" >
+                        <i class="fab fa-neos fa-stack-xs"></i>
+                        Naija
+                    </a>
+          </div>
 
+          <div class="col-md-1 mx-auto py-1 text-right">
+                <a href="http://www.tal.univ-paris3.fr/trameur/iTrameur/" target="_blank">
+                        <i class="fab fa-delicious fa-stack-xs"></i>
+                      iTrameur
+                    </a>
+          </div>
+        <!--<hr class="clearfix w-100 d-md-none">-->
+      <div class="bg-dark col-md-4 text-white text-center py-1 border-left border-right">
+        Developed by <a href="mailto:sergefleury@gmail.com" target="_blank">Serge Fleury</a> &amp; Xingyu Liu
+        <a href="https://www.gnu.org/licenses/agpl-3.0.html" target="_blank"><img src="images/agpl3.png" width="60"></a>
+      </div>
+
+      <div class="col-md-1 mx-auto py-1 text-right">
+            <p class="font-weight-bold text-white  ">Support</p>
+          </div>
+          <div class="col-md-1 text-right mx-auto py-1">
+                <a href="https://github.com/interface-iTrameur-Naija" target="_blank">
+                        <i class="fab fa-github fa-stack-xs "></i>
+                      Source
+                    </a>
+          </div>
+          <div class="col-md-2 text-left mx-auto py-1">
+                <a href="https://github.com/interface-iTrameur-Naija/interface_iTrameur-Naija/issues" target="_blank">
+                        <i class="fab fa-git fa-stack-xs "></i>
+                      Report issue
+                    </a>
+          </div>
+        </div>
+    </div>
+
+      <!-- Copyright -->
+    </footer>
     <script>
       $(".collapse").collapse({ toggle: false });
     </script>
